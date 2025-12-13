@@ -32,7 +32,7 @@ export default function NotFound() {
         </div>
       </div>
       
-      {/* Decorative elements */}
+      
       <div className="mt-12 flex space-x-2">
         {[...Array(5)].map((_, i) => (
           <div 

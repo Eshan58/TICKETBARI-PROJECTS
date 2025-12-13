@@ -17,7 +17,7 @@ export default function AllTickets() {
     setError(null);
     try {
       const query = `?page=${page}&limit=8&transport=${transport}&sort=${sort}`;
-      // console.log("📡 Fetching tickets with query:", query);
+     
 
       const response = await apiRequest(`/api/tickets${query}`);
 

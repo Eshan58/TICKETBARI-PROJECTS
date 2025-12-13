@@ -66,7 +66,7 @@ export default function Home() {
         setError(
           "Unable to load advertisements. Backend server may not be running."
         );
-        setAds([]); // Set empty array on error
+        setAds([]);
       } finally {
         setLoading(false);
       }

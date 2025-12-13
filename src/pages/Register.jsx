@@ -335,7 +335,7 @@ export default function Register() {
               </div>
             </form>
 
-            {/* Security note */}
+         
             <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="flex items-center text-gray-600">
                 <svg
