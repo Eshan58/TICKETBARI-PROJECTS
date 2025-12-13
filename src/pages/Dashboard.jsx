@@ -1,4 +1,328 @@
+// import React, { useState, useEffect } from "react";
+
+// export default function Dashboard() {
+//   const [dashboardData, setDashboardData] = useState({
+//     stats: {
+//       totalBooked: 0,
+//       pending: 0,
+//       confirmed: 0,
+//       cancelled: 0,
+//       totalSpent: 0,
+//     },
+//     recentBookings: [],
+//     user: { name: "", email: "", role: "", memberSince: "" },
+//   });
+
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     fetchDashboardData();
+//   }, []);
+
+//   const fetchDashboardData = async () => {
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       // Get token from localStorage
+//       const token =
+//         localStorage.getItem("firebaseToken") || localStorage.getItem("token");
+
+//       if (!token) {
+//         setError("No authentication token found. Please login again.");
+//         setLoading(false);
+//         return;
+//       }
+
+//       console.log("📡 Fetching dashboard data with token...");
+
+//       const response = await fetch("http://localhost:5000/api/user/dashboard", {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       });
+
+//       console.log("Response status:", response.status);
+
+//       if (response.status === 401) {
+//         setError("Session expired. Please login again.");
+//         localStorage.removeItem("firebaseToken");
+//         localStorage.removeItem("token");
+//         return;
+//       }
+
+//       if (!response.ok) {
+//         throw new Error(`Server error: ${response.status}`);
+//       }
+
+//       const data = await response.json();
+
+//       if (data.success) {
+//         setDashboardData(data.data);
+//       } else {
+//         setError(data.message || "Failed to load dashboard");
+//       }
+//     } catch (err) {
+//       console.error("Dashboard error:", err);
+//       setError(`Error: ${err.message}`);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleLogout = () => {
+//     localStorage.removeItem("firebaseToken");
+//     localStorage.removeItem("token");
+//     window.location.href = "/login";
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="flex justify-center items-center h-64">
+//         <div className="text-center">
+//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+//           <p className="mt-4 text-gray-600">Loading dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <div className="p-4">
+//         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+//           <div className="flex items-center mb-4">
+//             <div className="p-2 bg-red-100 rounded-full mr-3">
+//               <span className="text-red-600">⚠️</span>
+//             </div>
+//             <div>
+//               <h3 className="font-semibold text-red-800">Dashboard Error</h3>
+//               <p className="text-red-600">{error}</p>
+//             </div>
+//           </div>
+//           <div className="flex space-x-3">
+//             <button
+//               onClick={fetchDashboardData}
+//               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+//             >
+//               Retry
+//             </button>
+//             <button
+//               onClick={handleLogout}
+//               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+//             >
+//               Logout
+//             </button>
+//             <a
+//               href="/debug-auth"
+//               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+//             >
+//               Debug
+//             </a>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
+//       {/* Sidebar */}
+//       <aside className="md:col-span-1 bg-white rounded-lg p-6 shadow">
+//         <div className="mb-8">
+//           <h3 className="text-lg font-semibold mb-4">User Profile</h3>
+//           <div className="flex items-center mb-4">
+//             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+//               <span className="text-blue-600 font-bold text-xl">
+//                 {dashboardData.user.name?.charAt(0)?.toUpperCase() || "U"}
+//               </span>
+//             </div>
+//             <div className="ml-3">
+//               <p className="font-medium">{dashboardData.user.name || "User"}</p>
+//               <p className="text-sm text-gray-500">
+//                 {dashboardData.user.email}
+//               </p>
+//               <p className="text-xs text-gray-400 capitalize mt-1 bg-gray-100 px-2 py-1 rounded inline-block">
+//                 {dashboardData.user.role || "user"} Account
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="text-sm text-gray-600 border-t pt-3">
+//             <p className="flex items-center">
+//               <span className="mr-2">📅</span>
+//               Member since:{" "}
+//               {dashboardData.user.memberSince
+//                 ? new Date(dashboardData.user.memberSince).toLocaleDateString()
+//                 : "N/A"}
+//             </p>
+//             <p className="flex items-center mt-2">
+//               <span className="mr-2">💰</span>
+//               Total spent: ${dashboardData.stats.totalSpent.toFixed(2)}
+//             </p>
+//           </div>
+//         </div>
+
+//         <nav>
+//           <ul className="space-y-2">
+//             <li>
+//               <a
+//                 href="/profile"
+//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+//               >
+//                 <span className="mr-3">👤</span> Profile
+//               </a>
+//             </li>
+//             <li>
+//               <a
+//                 href="/my-tickets"
+//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 bg-blue-50 text-blue-600 transition-colors"
+//               >
+//                 <span className="mr-3">🎫</span> My Booked Tickets
+//               </a>
+//             </li>
+//             <li>
+//               <a
+//                 href="/transactions"
+//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
+//               >
+//                 <span className="mr-3">💳</span> Transaction History
+//               </a>
+//             </li>
+//           </ul>
+//         </nav>
+
+//         <button
+//           onClick={handleLogout}
+//           className="w-full mt-6 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm transition-colors"
+//         >
+//           Logout
+//         </button>
+//       </aside>
+
+//       {/* Main Content */}
+//       <section className="md:col-span-3 space-y-6">
+//         {/* Welcome Message */}
+//         <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
+//           <h1 className="text-2xl font-bold mb-2">
+//             Welcome back, {dashboardData.user.name || "Traveler"}!
+//           </h1>
+//           <p className="opacity-90">Here's your travel dashboard</p>
+//         </div>
+
+//         {/* Stats Grid */}
+//         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+//           {[
+//             {
+//               label: "Total Booked",
+//               value: dashboardData.stats.totalBooked,
+//               color: "blue",
+//               icon: "🎫",
+//             },
+//             {
+//               label: "Pending",
+//               value: dashboardData.stats.pending,
+//               color: "yellow",
+//               icon: "⏳",
+//             },
+//             {
+//               label: "Confirmed",
+//               value: dashboardData.stats.confirmed,
+//               color: "green",
+//               icon: "✅",
+//             },
+//             {
+//               label: "Cancelled",
+//               value: dashboardData.stats.cancelled,
+//               color: "red",
+//               icon: "❌",
+//             },
+//           ].map((stat, index) => (
+//             <div key={index} className="bg-white rounded-lg p-6 shadow">
+//               <div className="flex items-center">
+//                 <div className={`p-3 rounded-full bg-${stat.color}-100`}>
+//                   <span className={`text-${stat.color}-600 text-xl`}>
+//                     {stat.icon}
+//                   </span>
+//                 </div>
+//                 <div className="ml-4">
+//                   <p className="text-sm text-gray-500">{stat.label}</p>
+//                   <p className="text-2xl font-bold">{stat.value}</p>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Recent Bookings */}
+//         <div className="bg-white rounded-lg p-6 shadow">
+//           <div className="flex justify-between items-center mb-6">
+//             <h2 className="text-xl font-semibold">Recent Bookings</h2>
+//             <button
+//               onClick={fetchDashboardData}
+//               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+//             >
+//               Refresh
+//             </button>
+//           </div>
+
+//           {dashboardData.recentBookings.length === 0 ? (
+//             <div className="text-center py-12">
+//               <p className="text-gray-500">No bookings yet</p>
+//               <a
+//                 href="/tickets"
+//                 className="text-blue-600 hover:underline mt-2 inline-block"
+//               >
+//                 Browse Tickets
+//               </a>
+//             </div>
+//           ) : (
+//             <div className="space-y-4">
+//               {dashboardData.recentBookings.map((booking) => (
+//                 <div
+//                   key={booking._id}
+//                   className="border border-gray-200 rounded-lg p-4"
+//                 >
+//                   <div className="flex justify-between">
+//                     <div>
+//                       <h3 className="font-medium">
+//                         {booking.ticketTitle || booking.ticketId?.title}
+//                       </h3>
+//                       <p className="text-sm text-gray-600">
+//                         {booking.ticketId?.from} → {booking.ticketId?.to}
+//                       </p>
+//                     </div>
+//                     <div className="text-right">
+//                       <div className="font-bold">
+//                         ${booking.totalPrice?.toFixed(2)}
+//                       </div>
+//                       <span
+//                         className={`text-xs px-2 py-1 rounded-full ${
+//                           booking.status === "confirmed"
+//                             ? "bg-green-100 text-green-800"
+//                             : booking.status === "pending"
+//                             ? "bg-yellow-100 text-yellow-800"
+//                             : "bg-red-100 text-red-800"
+//                         }`}
+//                       >
+//                         {booking.status}
+//                       </span>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           )}
+//         </div>
+//       </section>
+//     </div>
+//   );
+// }
 import React, { useState, useEffect } from "react";
+import { apiRequest, getIdToken } from "../services/api.js"; // Adjust import path as needed
+import { TbCurrencyTaka } from "react-icons/tb";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState({
@@ -7,250 +331,371 @@ export default function Dashboard() {
       pending: 0,
       confirmed: 0,
       cancelled: 0,
-      totalSpent: 0
+      totalSpent: 0,
     },
     recentBookings: [],
-    user: {
-      name: "",
-      email: "",
-      role: "",
-      memberSince: ""
-    }
+    user: { name: "", email: "", role: "", memberSince: "" },
   });
-  
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    checkAuthAndFetchData();
+    fetchDashboardData();
   }, []);
 
-  // First check if user is authenticated
-  const checkAuthAndFetchData = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Check if we have a token
-      const token = getAuthToken();
-      
-      if (!token) {
-        setIsAuthenticated(false);
-        setError("Please login to access your dashboard");
+      setError("");
+
+      // Try multiple methods to get token
+      const token = await getIdToken();
+      const localStorageToken =
+        localStorage.getItem("firebaseToken") || localStorage.getItem("token");
+
+      console.log("🔍 Token status check:", {
+        fromApiJs: token ? "Present" : "Missing",
+        fromLocalStorage: localStorageToken ? "Present" : "Missing",
+      });
+
+      // Determine which token to use
+      let tokenToUse = token || localStorageToken;
+
+      if (!tokenToUse) {
+        setError("No authentication token found. Please login again.");
         setLoading(false);
+
+        // Auto-redirect to login after 3 seconds
+        setTimeout(() => {
+          console.log("🔄 Auto-redirecting to login page");
+          window.location.href = "/login";
+        }, 3000);
         return;
       }
-      
-      console.log("✅ Token found, attempting to fetch dashboard...");
-      setIsAuthenticated(true);
-      await fetchDashboardData(token);
-      
+
+      // If api.js provided token, use it with apiRequest
+      if (token) {
+        console.log("📡 Using api.js for request");
+        await fetchWithApiUtility(token);
+      } else {
+        // Fallback to direct fetch with localStorage token
+        console.log("📡 Using localStorage token for request");
+        await fetchWithToken(tokenToUse);
+      }
     } catch (err) {
-      console.error('Auth check error:', err);
-      setError("Authentication failed. Please login again.");
-      setIsAuthenticated(false);
+      console.error("Dashboard initialization error:", err);
+      setError(`Initialization error: ${err.message}`);
       setLoading(false);
     }
   };
 
-  const fetchDashboardData = async (token) => {
+  const fetchWithApiUtility = async (token) => {
     try {
-      console.log("📡 Fetching dashboard data...");
-      
-      const response = await fetch('http://localhost:5000/api/user/dashboard', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      console.log("📡 Fetching dashboard data using api.js...");
+
+      // Manually create request with token to ensure it's included
+      const response = await apiRequest("/api/user/dashboard", "GET");
+
+      console.log("API.js response:", {
+        status: response.status,
+        success: response.data?.success,
+        hasData: !!response.data?.data,
       });
-      
-      console.log("📊 Response status:", response.status);
-      
+
       if (response.status === 401) {
-        // Token expired or invalid
-        console.log("❌ Token expired or invalid (401)");
-        clearAuthToken();
-        setIsAuthenticated(false);
         setError("Session expired. Please login again.");
-        setLoading(false);
+        clearAuthTokens();
+
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
         return;
       }
-      
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log("📦 Dashboard data received:", data);
-      
-      if (data.success) {
-        setDashboardData(data.data);
-        setError(null);
+
+      if (response.data?.success && response.data.data) {
+        setDashboardData(response.data.data);
       } else {
-        setError(data.message || 'Failed to load dashboard data');
+        setError(response.data?.message || "Failed to load dashboard");
       }
     } catch (err) {
-      console.error('❌ Dashboard fetch error:', err);
-      setError(`Error: ${err.message}`);
+      console.error("API utility error:", err);
+
+      // Fallback to direct fetch if api.js fails
+      console.log("⚠️ api.js failed, trying direct fetch...");
+      const fallbackToken =
+        (await getIdToken()) ||
+        localStorage.getItem("firebaseToken") ||
+        localStorage.getItem("token");
+      if (fallbackToken) {
+        await fetchWithToken(fallbackToken);
+      } else {
+        setError(`API error: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper function to get auth token
-  const getAuthToken = () => {
-    if (typeof window === 'undefined') return null;
-    
-    // Check all possible locations where token might be stored
-    const token = 
-      localStorage.getItem('firebaseToken') ||
-      localStorage.getItem('authToken') ||
-      localStorage.getItem('token') ||
-      localStorage.getItem('idToken') || // Firebase often uses idToken
-      sessionStorage.getItem('firebaseToken') ||
-      sessionStorage.getItem('authToken');
-    
-    console.log("🔍 Looking for token... found:", token ? "Yes" : "No");
-    return token;
+  const fetchWithToken = async (token) => {
+    try {
+      console.log("📡 Fetching dashboard data with token...");
+
+      const response = await fetch("http://localhost:5000/api/user/dashboard", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("Response status:", response.status);
+
+      if (response.status === 401) {
+        setError("Session expired. Please login again.");
+        clearAuthTokens();
+
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
+        return;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server response error:", errorText);
+
+        // Try to parse as JSON
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(
+            errorData.message || `Server error: ${response.status}`
+          );
+        } catch {
+          throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log("📊 Dashboard data received successfully");
+
+      if (data.success) {
+        setDashboardData(data.data);
+      } else {
+        setError(data.message || "Failed to load dashboard");
+      }
+    } catch (err) {
+      console.error("Fetch with token error:", err);
+
+      if (err.message.includes("Failed to fetch")) {
+        setError(
+          "Cannot connect to server. Please check if the server is running on http://localhost:5000"
+        );
+      } else if (err.message.includes("NetworkError")) {
+        setError("Network error. Please check your internet connection.");
+      } else if (err.message.includes("401")) {
+        setError("Authentication failed. Please login again.");
+        clearAuthTokens();
+      } else {
+        setError(`Error: ${err.message}`);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Clear auth token
-  const clearAuthToken = () => {
-    if (typeof window === 'undefined') return;
-    
-    localStorage.removeItem('firebaseToken');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('token');
-    localStorage.removeItem('idToken');
-    sessionStorage.removeItem('firebaseToken');
-    sessionStorage.removeItem('authToken');
-    
-    console.log("🗑️ Cleared auth tokens");
-  };
-
-  const handleLogin = () => {
-    // Redirect to your login page
-    window.location.href = '/login';
+  const clearAuthTokens = () => {
+    localStorage.removeItem("firebaseToken");
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("firebaseToken");
+    sessionStorage.removeItem("token");
+    console.log("🗑️ Cleared all auth tokens");
   };
 
   const handleLogout = () => {
-    clearAuthToken();
-    setIsAuthenticated(false);
-    setDashboardData({
-      stats: { totalBooked: 0, pending: 0, confirmed: 0, cancelled: 0, totalSpent: 0 },
-      recentBookings: [],
-      user: { name: "", email: "", role: "", memberSince: "" }
-    });
-    window.location.href = '/login';
+    clearAuthTokens();
+    console.log("🚪 Logging out");
+    window.location.href = "/login";
   };
 
-  const pendingTickets = dashboardData.recentBookings.filter(ticket => ticket.status === 'pending');
+  const handleRetry = async () => {
+    console.log("🔄 Manually retrying...");
+    setError("");
+    await fetchDashboardData();
+  };
+
+  const handleDebug = () => {
+    console.log("🔍 DEBUG INFO:");
+    console.log("LocalStorage contents:", {
+      firebaseToken: localStorage.getItem("firebaseToken")
+        ? `${localStorage.getItem("firebaseToken").substring(0, 30)}...`
+        : "Missing",
+      token: localStorage.getItem("token")
+        ? `${localStorage.getItem("token").substring(0, 30)}...`
+        : "Missing",
+    });
+
+    console.log("Current state:", {
+      loading,
+      error: error || "None",
+      userData: dashboardData.user.name
+        ? `User: ${dashboardData.user.name}`
+        : "No user data",
+      statsLoaded: dashboardData.stats.totalBooked > 0 ? "Yes" : "No",
+    });
+
+    // Show alert with debug info
+    const tokenPresent =
+      localStorage.getItem("firebaseToken") || localStorage.getItem("token");
+    const tokenPreview = tokenPresent
+      ? `${tokenPresent.substring(0, 20)}...`
+      : "None";
+
+    alert(
+      `=== Dashboard Debug Info ===\n\n` +
+        `🔐 Token Status: ${tokenPresent ? "Present" : "Missing"}\n` +
+        `Token Preview: ${tokenPreview}\n\n` +
+        `📊 Dashboard State:\n` +
+        `• Loading: ${loading ? "Yes" : "No"}\n` +
+        `• Error: ${error || "None"}\n` +
+        `• User Data: ${dashboardData.user.name ? "Loaded" : "Not loaded"}\n` +
+        `• Stats Loaded: ${
+          dashboardData.stats.totalBooked > 0 ? "Yes" : "No"
+        }\n\n` +
+        `🔧 Actions:\n` +
+        `1. Check console for details\n` +
+        `2. Use 'Refresh Token' if token is missing\n` +
+        `3. Use 'Retry' to fetch data again`
+    );
+  };
+
+  const handleForceTokenRefresh = async () => {
+    console.log("🔄 Forcing token refresh...");
+
+    try {
+      // Import firebase auth directly
+      const { auth } = await import("../firebase.config.js");
+      if (auth.currentUser) {
+        console.log("Current user found:", auth.currentUser.email);
+        const freshToken = await auth.currentUser.getIdToken(true); // Force refresh
+        localStorage.setItem("firebaseToken", freshToken);
+        console.log("✅ Got fresh token, stored in localStorage");
+
+        // Retry with new token
+        await fetchWithToken(freshToken);
+      } else {
+        setError("No user logged in. Please login again.");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Token refresh error:", err);
+      setError(`Token refresh failed: ${err.message}`);
+    }
+  };
+
+  const handleClearAndRetry = () => {
+    console.log("🧹 Clearing tokens and retrying...");
+    clearAuthTokens();
+    window.location.reload();
+  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex flex-col justify-center items-center h-64 space-y-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
-          <p className="mt-6 text-gray-600 text-lg">Loading your dashboard...</p>
-          <p className="text-gray-400 text-sm mt-2">Checking authentication status</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-lg">
+            Loading your dashboard...
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            Fetching your travel data
+          </p>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleDebug}
+            className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+          >
+            Debug Loading
+          </button>
+          <button
+            onClick={() => setLoading(false)}
+            className="px-3 py-1 text-sm bg-gray-50 text-gray-600 rounded hover:bg-gray-100"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     );
   }
 
-  if (error && !isAuthenticated) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex flex-col items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-          <div className="text-center mb-8">
-            <div className="text-red-500 text-6xl mb-4">🔒</div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-3">Authentication Required</h1>
-            <p className="text-gray-600 mb-2">{error}</p>
-            <p className="text-gray-500 text-sm">You need to be logged in to view your dashboard</p>
-          </div>
-          
-          <div className="space-y-4">
-            <button 
-              onClick={handleLogin}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all font-medium text-lg shadow-md hover:shadow-lg"
-            >
-              🔐 Go to Login
-            </button>
-            
-            <button 
-              onClick={checkAuthAndFetchData}
-              className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-            >
-              🔄 Retry Connection
-            </button>
-            
-            <button 
-              onClick={() => {
-                console.log("Debug info:");
-                console.log("Token:", getAuthToken());
-                console.log("LocalStorage:", localStorage);
-                testApiConnection();
-              }}
-              className="w-full py-3 bg-yellow-50 text-yellow-700 rounded-xl hover:bg-yellow-100 transition-colors font-medium text-sm"
-            >
-              🐛 Debug Info
-            </button>
-            
-            <div className="text-center mt-8 pt-8 border-t border-gray-200">
-              <p className="text-gray-500 text-sm">
-                Don't have an account?{' '}
-                <a href="/register" className="text-blue-600 hover:underline font-medium">
-                  Sign up here
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        {/* Debug info */}
-        <div className="mt-8 text-center text-gray-400 text-sm">
-          <p>Server URL: http://localhost:5000</p>
-          <p>Token exists: {getAuthToken() ? "Yes" : "No"}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If there's an error but user is authenticated
-  if (error && isAuthenticated) {
-    return (
-      <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 max-w-4xl mx-auto">
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <div className="flex items-center mb-4">
             <div className="p-3 bg-red-100 rounded-full mr-4">
-              <span className="text-red-600 text-2xl">⚠️</span>
+              <span className="text-red-600 text-xl">⚠️</span>
             </div>
             <div>
-              <h3 className="font-bold text-red-800 text-xl">Dashboard Error</h3>
-              <p className="text-red-600">{error}</p>
-              <p className="text-red-500 text-sm mt-2">Please check your connection or contact support</p>
+              <h3 className="font-semibold text-red-800 text-lg">
+                Dashboard Error
+              </h3>
+              <p className="text-red-600 mt-1">{error}</p>
+              {error.includes("token") || error.includes("login") ? (
+                <p className="text-sm text-red-500 mt-2">
+                  Redirecting to login page in 3 seconds...
+                </p>
+              ) : error.includes("connect") || error.includes("server") ? (
+                <p className="text-sm text-red-500 mt-2">
+                  Make sure your backend server is running on
+                  http://localhost:5000
+                </p>
+              ) : null}
             </div>
           </div>
-          <div className="flex space-x-4 mt-6">
-            <button 
-              onClick={() => fetchDashboardData(getAuthToken())}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
-            >
-              🔄 Retry
-            </button>
-            <button 
-              onClick={handleLogout}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
-            >
-              🚪 Logout
-            </button>
-            <button 
-              onClick={testApiConnection}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-            >
-              🐛 Test API
-            </button>
+
+          <div className="mt-6">
+            <p className="text-sm text-gray-600 mb-3">Try these solutions:</p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleRetry}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Retry Request
+              </button>
+              <button
+                onClick={handleForceTokenRefresh}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+              >
+                Refresh Token
+              </button>
+              <button
+                onClick={handleClearAndRetry}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              >
+                Clear & Reload
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Logout
+              </button>
+              <button
+                onClick={handleDebug}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Debug Info
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-red-100">
+            <p className="text-xs text-gray-500">
+              Need help? Check console for detailed error information.
+            </p>
           </div>
         </div>
       </div>
@@ -258,305 +703,343 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-4 md:p-6">
+      {/* Sidebar */}
+      <aside className="md:col-span-1 bg-white rounded-xl p-6 shadow-lg">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {dashboardData.user.name || 'Traveler'}! Manage your bookings and travel plans.</p>
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+            User Profile
+          </h3>
+          <div className="flex items-center mb-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center shadow">
+              <span className="text-blue-600 font-bold text-2xl">
+                {dashboardData.user.name?.charAt(0)?.toUpperCase() || "U"}
+              </span>
+            </div>
+            <div className="ml-4">
+              <p className="font-medium text-gray-800">
+                {dashboardData.user.name || "User"}
+              </p>
+              <p className="text-sm text-gray-500 truncate max-w-[180px]">
+                {dashboardData.user.email}
+              </p>
+              <span className="inline-block mt-1 text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 capitalize">
+                {dashboardData.user.role || "user"} Account
+              </span>
+            </div>
+          </div>
+
+          <div className="text-sm text-gray-600 border-t pt-4 space-y-3">
+            <div className="flex items-center">
+              <span className="mr-3 text-gray-400">📅</span>
+              <div>
+                <p className="font-medium">Member since</p>
+                <p className="text-gray-500">
+                  {dashboardData.user.memberSince
+                    ? new Date(
+                        dashboardData.user.memberSince
+                      ).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-3 text-gray-400">💰</span>
+              <div>
+                <p className="font-medium">Total spent</p>
+                <p className="text-gray-500">
+                  ${dashboardData.stats.totalSpent.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow p-6 mb-6">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-blue-600 font-bold text-2xl">
-                    {dashboardData.user.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <h3 className="font-bold text-xl">{dashboardData.user.name || 'User'}</h3>
-                <p className="text-gray-500 text-sm">{dashboardData.user.email}</p>
-                <div className="mt-2">
-                  <span className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-full capitalize">
-                    {dashboardData.user.role || 'user'} Account
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center text-gray-600">
-                  <span className="mr-3">📅</span>
-                  <div>
-                    <p className="text-sm">Member since</p>
-                    <p className="font-medium">{dashboardData.user.memberSince ? new Date(dashboardData.user.memberSince).toLocaleDateString() : 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <span className="mr-3">💰</span>
-                  <div>
-                    <p className="text-sm">Total spent</p>
-                    <p className="font-medium">${dashboardData.stats.totalSpent.toFixed(2)}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <nav className="space-y-1">
-                <a href="/profile" className="flex items-center p-3 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
-                  <span className="mr-3">👤</span> Profile
-                </a>
-                <a href="/my-tickets" className="flex items-center p-3 rounded-lg bg-blue-50 text-blue-600">
-                  <span className="mr-3">🎫</span> My Booked Tickets
-                </a>
-                <a href="/transactions" className="flex items-center p-3 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
-                  <span className="mr-3">💳</span> Transaction History
-                </a>
-                {dashboardData.user.role === 'vendor' && (
-                  <a href="/vendor" className="flex items-center p-3 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
-                    <span className="mr-3">🏪</span> Vendor Panel
-                  </a>
-                )}
-                {dashboardData.user.role === 'admin' && (
-                  <a href="/admin" className="flex items-center p-3 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
-                    <span className="mr-3">👑</span> Admin Panel
-                  </a>
-                )}
-              </nav>
-              
-              <button 
-                onClick={handleLogout}
-                className="w-full mt-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+
+        <nav className="mb-6">
+          <h4 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+            Navigation
+          </h4>
+          <ul className="space-y-1">
+            <li>
+              <a
+                href="/profile"
+                className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
               >
-                🚪 Logout
+                <span className="mr-3">👤</span>
+                <span>Profile</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/my-tickets"
+                className="flex items-center p-3 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <span className="mr-3">🎫</span>
+                <span className="font-medium">My Booked Tickets</span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="/transactions"
+                className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+              >
+                <span className="mr-3">💳</span>
+                <span>Transaction History</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="space-y-3">
+          <button
+            onClick={fetchDashboardData}
+            className="w-full py-2.5 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Refresh Dashboard
+          </button>
+
+          <button
+            onClick={handleDebug}
+            className="w-full py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+          >
+            Show Debug Info
+          </button>
+
+          <button
+            onClick={handleForceTokenRefresh}
+            className="w-full py-2.5 px-4 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition-colors text-sm"
+          >
+            Refresh Auth Token
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="w-full py-2.5 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+          >
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <section className="md:col-span-3 space-y-6">
+        {/* Welcome Message */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">
+                Welcome back, {dashboardData.user.name || "Traveler"}! 👋
+              </h1>
+              <p className="opacity-90">
+                Here's your travel dashboard overview
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm opacity-80">
+                Last updated:{" "}
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <button
+                onClick={fetchDashboardData}
+                className="mt-2 text-sm bg-white/20 hover:bg-white/30 px-4 py-1.5 rounded-lg transition-colors"
+              >
+                ↻ Refresh
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white rounded-xl shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <span className="text-blue-600 text-xl">🎫</span>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-500">Total Booked</p>
-                    <p className="text-2xl font-bold">{dashboardData.stats.totalBooked}</p>
-                  </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            {
+              label: "Total Booked",
+              value: dashboardData.stats.totalBooked,
+              color: "blue",
+              icon: "🎫",
+              description: "All bookings",
+            },
+            {
+              label: "Pending",
+              value: dashboardData.stats.pending,
+              color: "yellow",
+              icon: "⏳",
+              description: "Awaiting confirmation",
+            },
+            {
+              label: "Confirmed",
+              value: dashboardData.stats.confirmed,
+              color: "green",
+              icon: "✅",
+              description: "Confirmed trips",
+            },
+            {
+              label: "Cancelled",
+              value: dashboardData.stats.cancelled,
+              color: "red",
+              icon: "❌",
+              description: "Cancelled bookings",
+            },
+          ].map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl p-5 shadow hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center">
+                <div className={`p-3 rounded-xl bg-${stat.color}-50`}>
+                  <span className={`text-2xl`}>{stat.icon}</span>
                 </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-yellow-100 rounded-lg">
-                    <span className="text-yellow-600 text-xl">⏳</span>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-500">Pending</p>
-                    <p className="text-2xl font-bold">{dashboardData.stats.pending}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <span className="text-green-600 text-xl">✅</span>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-500">Confirmed</p>
-                    <p className="text-2xl font-bold">{dashboardData.stats.confirmed}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 bg-red-100 rounded-lg">
-                    <span className="text-red-600 text-xl">❌</span>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm text-gray-500">Cancelled</p>
-                    <p className="text-2xl font-bold">{dashboardData.stats.cancelled}</p>
-                  </div>
+                <div className="ml-4">
+                  <p className="text-sm text-gray-500">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-800 mt-1">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {stat.description}
+                  </p>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Recent Bookings */}
-            <div className="bg-white rounded-xl shadow p-6 mb-6">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Recent Bookings</h2>
-                  <p className="text-gray-500">Your latest travel bookings</p>
-                </div>
-                <div className="flex space-x-2">
-                  <button 
-                    onClick={() => fetchDashboardData(getAuthToken())}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-                  >
-                    🔄 Refresh
-                  </button>
-                  <a 
-                    href="/my-tickets"
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium"
-                  >
-                    📋 View All
-                  </a>
-                </div>
-              </div>
-              
-              {dashboardData.recentBookings.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-gray-300 text-6xl mb-4">✈️</div>
-                  <h3 className="text-xl font-medium text-gray-700 mb-2">No bookings yet</h3>
-                  <p className="text-gray-500 mb-6">Start your journey by booking your first ticket!</p>
-                  <a 
-                    href="/tickets" 
-                    className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-medium"
-                  >
-                    🎫 Browse Available Tickets
-                  </a>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket Details</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Departure</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {dashboardData.recentBookings.map((booking) => (
-                        <tr key={booking._id} className="hover:bg-gray-50">
-                          <td className="px-4 py-4">
-                            <div className="font-medium text-gray-900">{booking.ticketTitle || booking.ticketId?.title}</div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              {booking.ticketId?.from} → {booking.ticketId?.to}
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1">
-                              ID: {booking.bookingReference}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4">
-                            {booking.ticketId?.departureAt 
-                              ? new Date(booking.ticketId.departureAt).toLocaleDateString()
-                              : 'N/A'}
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              booking.status === 'confirmed' 
-                                ? 'bg-green-100 text-green-800'
-                                : booking.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="font-bold">${booking.totalPrice?.toFixed(2)}</div>
-                            <div className="text-xs text-gray-500">
-                              {booking.quantity} ticket{booking.quantity > 1 ? 's' : ''}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+        {/* Recent Bookings */}
+        <div className="bg-white rounded-xl p-6 shadow">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Recent Bookings
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Your latest travel bookings
+              </p>
             </div>
-
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <a href="/tickets" className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-blue-200 transition-all">
-                <div className="flex items-center">
-                  <div className="p-3 bg-blue-200 rounded-lg">
-                    <span className="text-blue-700 text-xl">🔍</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-gray-900">Book Tickets</h4>
-                    <p className="text-gray-600 text-sm">Find buses, trains, launches</p>
-                  </div>
-                </div>
-              </a>
-              
-              <a href="/my-tickets" className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-6 hover:from-green-100 hover:to-green-200 transition-all">
-                <div className="flex items-center">
-                  <div className="p-3 bg-green-200 rounded-lg">
-                    <span className="text-green-700 text-xl">📋</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-gray-900">My Bookings</h4>
-                    <p className="text-gray-600 text-sm">View all your tickets</p>
-                  </div>
-                </div>
-              </a>
-              
-              <a href="/profile" className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 hover:from-purple-100 hover:to-purple-200 transition-all">
-                <div className="flex items-center">
-                  <div className="p-3 bg-purple-200 rounded-lg">
-                    <span className="text-purple-700 text-xl">👤</span>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-gray-900">Profile</h4>
-                    <p className="text-gray-600 text-sm">Update information</p>
-                  </div>
-                </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={fetchDashboardData}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                Refresh
+              </button>
+              <a
+                href="/my-tickets"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+              >
+                View All
               </a>
             </div>
           </div>
+
+          {dashboardData.recentBookings.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">✈️</div>
+              <p className="text-gray-500 text-lg">No bookings yet</p>
+              <p className="text-gray-400 text-sm mt-2">
+                Start planning your next adventure
+              </p>
+              <a
+                href="/tickets"
+                className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Browse Tickets
+              </a>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {dashboardData.recentBookings.map((booking) => (
+                <div
+                  key={booking._id}
+                  className="border border-gray-200 rounded-xl p-4 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div className="mb-3 sm:mb-0">
+                      <h3 className="font-medium text-gray-800">
+                        {booking.ticketTitle ||
+                          booking.ticketId?.title ||
+                          "Untitled Booking"}
+                      </h3>
+                      <div className="flex items-center mt-1 text-sm text-gray-600">
+                        <span>{booking.ticketId?.from || "Unknown"}</span>
+                        <span className="mx-2">→</span>
+                        <span>{booking.ticketId?.to || "Unknown"}</span>
+                        {booking.ticketId?.departureAt && (
+                          <span className="ml-4 text-gray-500">
+                            {new Date(
+                              booking.ticketId.departureAt
+                            ).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <div className="font-bold text-lg text-gray-800 flex items-center">
+                          <TbCurrencyTaka />
+                          {booking.totalPrice?.toFixed(2) || "0.00"}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {booking.quantity}{" "}
+                          {booking.quantity === 1 ? "ticket" : "tickets"}
+                        </div>
+                      </div>
+                      <span
+                        className={`text-xs font-medium px-3 py-1.5 rounded-full ${
+                          booking.status === "confirmed"
+                            ? "bg-green-100 text-green-800"
+                            : booking.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {booking.status?.charAt(0).toUpperCase() +
+                          booking.status?.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow">
+            <h3 className="font-semibold text-gray-800 mb-4">Total Spending</h3>
+            <div className="text-3xl font-bold text-blue-600 flex items-center">
+              <TbCurrencyTaka />
+              {dashboardData.stats.totalSpent.toFixed(2)}
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              Across all your bookings
+            </p>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow">
+            <h3 className="font-semibold text-gray-800 mb-4">Account Type</h3>
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 flex items-center justify-center mr-3">
+                <span className="text-purple-600">👑</span>
+              </div>
+              <div>
+                <div className="font-medium text-gray-800 capitalize">
+                  {dashboardData.user.role || "user"} Account
+                </div>
+                <div className="text-sm text-gray-500">
+                  Full access to all features
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
-
-// Debug function
-const testApiConnection = async () => {
-  try {
-    console.log("🔍 Testing API connection...");
-    
-    // Test server health
-    const healthResponse = await fetch('http://localhost:5000/api/health');
-    const healthData = await healthResponse.json();
-    console.log("✅ Health check:", healthData);
-    
-    // Check if token exists
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken') || localStorage.getItem('firebaseToken');
-    console.log("🔐 Token exists:", token ? "Yes" : "No");
-    
-    if (token) {
-      console.log("🔑 Token preview:", token.substring(0, 20) + "...");
-      
-      // Test dashboard endpoint
-      try {
-        const dashResponse = await fetch('http://localhost:5000/api/user/dashboard', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
-        console.log("📊 Dashboard response status:", dashResponse.status);
-        
-        if (dashResponse.status === 401) {
-          console.log("❌ Token is invalid or expired");
-        } else if (dashResponse.ok) {
-          const dashData = await dashResponse.json();
-          console.log("✅ Dashboard data:", dashData);
-        }
-      } catch (dashError) {
-        console.error("❌ Dashboard test error:", dashError);
-      }
-    }
-    
-  } catch (err) {
-    console.error("❌ API test error:", err);
-  }
-};
