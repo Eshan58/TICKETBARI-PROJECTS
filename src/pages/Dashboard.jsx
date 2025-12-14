@@ -1,325 +1,3 @@
-// import React, { useState, useEffect } from "react";
-
-// export default function Dashboard() {
-//   const [dashboardData, setDashboardData] = useState({
-//     stats: {
-//       totalBooked: 0,
-//       pending: 0,
-//       confirmed: 0,
-//       cancelled: 0,
-//       totalSpent: 0,
-//     },
-//     recentBookings: [],
-//     user: { name: "", email: "", role: "", memberSince: "" },
-//   });
-
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     fetchDashboardData();
-//   }, []);
-
-//   const fetchDashboardData = async () => {
-//     try {
-//       setLoading(true);
-//       setError("");
-
-//       // Get token from localStorage
-//       const token =
-//         localStorage.getItem("firebaseToken") || localStorage.getItem("token");
-
-//       if (!token) {
-//         setError("No authentication token found. Please login again.");
-//         setLoading(false);
-//         return;
-//       }
-
-//       console.log("📡 Fetching dashboard data with token...");
-
-//       const response = await fetch("http://localhost:5000/api/user/dashboard", {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//           "Content-Type": "application/json",
-//         },
-//       });
-
-//       console.log("Response status:", response.status);
-
-//       if (response.status === 401) {
-//         setError("Session expired. Please login again.");
-//         localStorage.removeItem("firebaseToken");
-//         localStorage.removeItem("token");
-//         return;
-//       }
-
-//       if (!response.ok) {
-//         throw new Error(`Server error: ${response.status}`);
-//       }
-
-//       const data = await response.json();
-
-//       if (data.success) {
-//         setDashboardData(data.data);
-//       } else {
-//         setError(data.message || "Failed to load dashboard");
-//       }
-//     } catch (err) {
-//       console.error("Dashboard error:", err);
-//       setError(`Error: ${err.message}`);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleLogout = () => {
-//     localStorage.removeItem("firebaseToken");
-//     localStorage.removeItem("token");
-//     window.location.href = "/login";
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="flex justify-center items-center h-64">
-//         <div className="text-center">
-//           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-//           <p className="mt-4 text-gray-600">Loading dashboard...</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="p-4">
-//         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-//           <div className="flex items-center mb-4">
-//             <div className="p-2 bg-red-100 rounded-full mr-3">
-//               <span className="text-red-600">⚠️</span>
-//             </div>
-//             <div>
-//               <h3 className="font-semibold text-red-800">Dashboard Error</h3>
-//               <p className="text-red-600">{error}</p>
-//             </div>
-//           </div>
-//           <div className="flex space-x-3">
-//             <button
-//               onClick={fetchDashboardData}
-//               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-//             >
-//               Retry
-//             </button>
-//             <button
-//               onClick={handleLogout}
-//               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-//             >
-//               Logout
-//             </button>
-//             <a
-//               href="/debug-auth"
-//               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-//             >
-//               Debug
-//             </a>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
-//       {/* Sidebar */}
-//       <aside className="md:col-span-1 bg-white rounded-lg p-6 shadow">
-//         <div className="mb-8">
-//           <h3 className="text-lg font-semibold mb-4">User Profile</h3>
-//           <div className="flex items-center mb-4">
-//             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-//               <span className="text-blue-600 font-bold text-xl">
-//                 {dashboardData.user.name?.charAt(0)?.toUpperCase() || "U"}
-//               </span>
-//             </div>
-//             <div className="ml-3">
-//               <p className="font-medium">{dashboardData.user.name || "User"}</p>
-//               <p className="text-sm text-gray-500">
-//                 {dashboardData.user.email}
-//               </p>
-//               <p className="text-xs text-gray-400 capitalize mt-1 bg-gray-100 px-2 py-1 rounded inline-block">
-//                 {dashboardData.user.role || "user"} Account
-//               </p>
-//             </div>
-//           </div>
-
-//           <div className="text-sm text-gray-600 border-t pt-3">
-//             <p className="flex items-center">
-//               <span className="mr-2">📅</span>
-//               Member since:{" "}
-//               {dashboardData.user.memberSince
-//                 ? new Date(dashboardData.user.memberSince).toLocaleDateString()
-//                 : "N/A"}
-//             </p>
-//             <p className="flex items-center mt-2">
-//               <span className="mr-2">💰</span>
-//               Total spent: ${dashboardData.stats.totalSpent.toFixed(2)}
-//             </p>
-//           </div>
-//         </div>
-
-//         <nav>
-//           <ul className="space-y-2">
-//             <li>
-//               <a
-//                 href="/profile"
-//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
-//               >
-//                 <span className="mr-3">👤</span> Profile
-//               </a>
-//             </li>
-//             <li>
-//               <a
-//                 href="/my-tickets"
-//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 bg-blue-50 text-blue-600 transition-colors"
-//               >
-//                 <span className="mr-3">🎫</span> My Booked Tickets
-//               </a>
-//             </li>
-//             <li>
-//               <a
-//                 href="/transactions"
-//                 className="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors"
-//               >
-//                 <span className="mr-3">💳</span> Transaction History
-//               </a>
-//             </li>
-//           </ul>
-//         </nav>
-
-//         <button
-//           onClick={handleLogout}
-//           className="w-full mt-6 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm transition-colors"
-//         >
-//           Logout
-//         </button>
-//       </aside>
-
-//       {/* Main Content */}
-//       <section className="md:col-span-3 space-y-6">
-//         {/* Welcome Message */}
-//         <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-//           <h1 className="text-2xl font-bold mb-2">
-//             Welcome back, {dashboardData.user.name || "Traveler"}!
-//           </h1>
-//           <p className="opacity-90">Here's your travel dashboard</p>
-//         </div>
-
-//         {/* Stats Grid */}
-//         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-//           {[
-//             {
-//               label: "Total Booked",
-//               value: dashboardData.stats.totalBooked,
-//               color: "blue",
-//               icon: "🎫",
-//             },
-//             {
-//               label: "Pending",
-//               value: dashboardData.stats.pending,
-//               color: "yellow",
-//               icon: "⏳",
-//             },
-//             {
-//               label: "Confirmed",
-//               value: dashboardData.stats.confirmed,
-//               color: "green",
-//               icon: "✅",
-//             },
-//             {
-//               label: "Cancelled",
-//               value: dashboardData.stats.cancelled,
-//               color: "red",
-//               icon: "❌",
-//             },
-//           ].map((stat, index) => (
-//             <div key={index} className="bg-white rounded-lg p-6 shadow">
-//               <div className="flex items-center">
-//                 <div className={`p-3 rounded-full bg-${stat.color}-100`}>
-//                   <span className={`text-${stat.color}-600 text-xl`}>
-//                     {stat.icon}
-//                   </span>
-//                 </div>
-//                 <div className="ml-4">
-//                   <p className="text-sm text-gray-500">{stat.label}</p>
-//                   <p className="text-2xl font-bold">{stat.value}</p>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-
-//         {/* Recent Bookings */}
-//         <div className="bg-white rounded-lg p-6 shadow">
-//           <div className="flex justify-between items-center mb-6">
-//             <h2 className="text-xl font-semibold">Recent Bookings</h2>
-//             <button
-//               onClick={fetchDashboardData}
-//               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-//             >
-//               Refresh
-//             </button>
-//           </div>
-
-//           {dashboardData.recentBookings.length === 0 ? (
-//             <div className="text-center py-12">
-//               <p className="text-gray-500">No bookings yet</p>
-//               <a
-//                 href="/tickets"
-//                 className="text-blue-600 hover:underline mt-2 inline-block"
-//               >
-//                 Browse Tickets
-//               </a>
-//             </div>
-//           ) : (
-//             <div className="space-y-4">
-//               {dashboardData.recentBookings.map((booking) => (
-//                 <div
-//                   key={booking._id}
-//                   className="border border-gray-200 rounded-lg p-4"
-//                 >
-//                   <div className="flex justify-between">
-//                     <div>
-//                       <h3 className="font-medium">
-//                         {booking.ticketTitle || booking.ticketId?.title}
-//                       </h3>
-//                       <p className="text-sm text-gray-600">
-//                         {booking.ticketId?.from} → {booking.ticketId?.to}
-//                       </p>
-//                     </div>
-//                     <div className="text-right">
-//                       <div className="font-bold">
-//                         ${booking.totalPrice?.toFixed(2)}
-//                       </div>
-//                       <span
-//                         className={`text-xs px-2 py-1 rounded-full ${
-//                           booking.status === "confirmed"
-//                             ? "bg-green-100 text-green-800"
-//                             : booking.status === "pending"
-//                             ? "bg-yellow-100 text-yellow-800"
-//                             : "bg-red-100 text-red-800"
-//                         }`}
-//                       >
-//                         {booking.status}
-//                       </span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       </section>
-//     </div>
-//   );
-// }
 import React, { useState, useEffect } from "react";
 import { apiRequest, getIdToken } from "../services/api.js"; // Adjust import path as needed
 import { TbCurrencyTaka } from "react-icons/tb";
@@ -665,12 +343,12 @@ export default function Dashboard() {
               >
                 Retry Request
               </button>
-              <button
+              {/* <button
                 onClick={handleForceTokenRefresh}
                 className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
               >
                 Refresh Token
-              </button>
+              </button> */}
               <button
                 onClick={handleClearAndRetry}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
@@ -683,12 +361,12 @@ export default function Dashboard() {
               >
                 Logout
               </button>
-              <button
+              {/* <button
                 onClick={handleDebug}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Debug Info
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -751,8 +429,9 @@ export default function Dashboard() {
               <span className="mr-3 text-gray-400">💰</span>
               <div>
                 <p className="font-medium">Total spent</p>
-                <p className="text-gray-500">
-                  ${dashboardData.stats.totalSpent.toFixed(2)}
+                <p className="text-gray-500 flex items-center">
+                  <TbCurrencyTaka />
+                  {dashboardData.stats.totalSpent.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -802,19 +481,19 @@ export default function Dashboard() {
             Refresh Dashboard
           </button>
 
-          <button
+          {/* <button
             onClick={handleDebug}
             className="w-full py-2.5 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
           >
             Show Debug Info
-          </button>
+          </button> */}
 
-          <button
+          {/* <button
             onClick={handleForceTokenRefresh}
             className="w-full py-2.5 px-4 bg-yellow-50 text-yellow-600 rounded-lg hover:bg-yellow-100 transition-colors text-sm"
           >
             Refresh Auth Token
-          </button>
+          </button> */}
 
           <button
             onClick={handleLogout}
@@ -928,12 +607,12 @@ export default function Dashboard() {
               >
                 Refresh
               </button>
-              <a
+              {/* <a
                 href="/my-tickets"
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
               >
                 View All
-              </a>
+              </a> */}
             </div>
           </div>
 

@@ -946,7 +946,7 @@ export default function AllTickets() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* <div className="flex flex-wrap gap-2">
           <button
             onClick={handleDebugRefresh}
             className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded flex items-center gap-1"
@@ -976,7 +976,7 @@ export default function AllTickets() {
           >
             <span>✅</span> Approve All
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Filter Controls */}
