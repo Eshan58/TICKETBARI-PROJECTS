@@ -1,241 +1,395 @@
 
-// import React, { createContext, useContext, useEffect, useState } from "react";
-// import { auth, googleProvider } from "../firebase.config.js";
-// import {
+// import React, { createContext, useState, useContext, useEffect } from 'react';
+// import { 
+//   signInWithPopup, 
+//   GoogleAuthProvider, 
+//   signOut as firebaseSignOut,
 //   onAuthStateChanged,
 //   signInWithEmailAndPassword,
-//   createUserWithEmailAndPassword,
-//   signOut,
-//   signInWithPopup,
-//   updateProfile,
-//   getIdToken,
-// } from "firebase/auth";
+//   createUserWithEmailAndPassword
+// } from 'firebase/auth';
+// import { auth } from '../firebase.config.js';
 
-// const AuthContext = createContext();
+// const AuthContext = createContext({});
+
 // export const useAuth = () => useContext(AuthContext);
 
-// export function AuthProvider({ children }) {
+// export const AuthProvider = ({ children }) => {
 //   const [user, setUser] = useState(null);
 //   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
 
-//   // Function to store token in localStorage
-//   const storeFirebaseToken = async (firebaseUser) => {
+//   const provider = new GoogleAuthProvider();
+
+//   // Sync user with backend - Handle missing endpoints gracefully
+//   const syncUserWithBackend = async (firebaseUser) => {
 //     try {
-//       const token = await getIdToken(firebaseUser);
+//       const token = await firebaseUser.getIdToken();
 //       localStorage.setItem("firebaseToken", token);
-//       console.log("✅ Firebase token stored in localStorage");
-//       return token;
+      
+//       // Try to get user profile from backend
+//       try {
+//         const response = await fetch("http://localhost:5000/api/user/profile", {
+//           headers: {
+//             'Authorization': `Bearer ${token}`,
+//             'Content-Type': 'application/json',
+//           },
+//         });
+        
+//         if (response.ok) {
+//           const data = await response.json();
+//           if (data.success && data.data?.user) {
+//             const userData = data.data.user;
+//             setUser(userData);
+//             return userData;
+//           }
+//         } else if (response.status === 401) {
+//           // User not found in database, create local user
+//           console.log("User not found in database, creating local user");
+//         } else if (response.status === 404) {
+//           // Endpoint doesn't exist
+//           console.log("User profile endpoint not found");
+//         }
+//       } catch (apiError) {
+//         console.log("Could not fetch user profile:", apiError.message);
+//       }
+      
+//       // Create local user if backend endpoints don't exist
+//       const localUser = {
+//         uid: firebaseUser.uid,
+//         email: firebaseUser.email,
+//         name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+//         photoURL: firebaseUser.photoURL,
+//         role: 'user', // Default role
+//         _firebaseUser: firebaseUser
+//       };
+      
+//       setUser(localUser);
+//       return localUser;
+      
 //     } catch (error) {
-//       console.error("Failed to get Firebase token:", error);
-//       localStorage.removeItem("firebaseToken");
-//       return null;
+//       console.error('Failed to sync user:', error);
+      
+//       // Fallback to local user
+//       const localUser = {
+//         uid: firebaseUser.uid,
+//         email: firebaseUser.email,
+//         name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+//         photoURL: firebaseUser.photoURL,
+//         role: 'user',
+//         _firebaseUser: firebaseUser
+//       };
+      
+//       setUser(localUser);
+//       return localUser;
 //     }
 //   };
 
+//   // Email/password login
+//   const login = async (email, password) => {
+//     try {
+//       setError(null);
+//       setLoading(true);
+      
+//       // Sign in with Firebase
+//       const result = await signInWithEmailAndPassword(auth, email, password);
+      
+//       // Sync with backend (will create local user if endpoints don't exist)
+//       const user = await syncUserWithBackend(result.user);
+//       return user;
+//     } catch (error) {
+//       setError(error.message);
+//       console.error("Email login error:", error);
+//       throw error;
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Google login
+//   const signInWithGoogle = async () => {
+//     try {
+//       setError(null);
+//       setLoading(true);
+//       const result = await signInWithPopup(auth, provider);
+//       const user = await syncUserWithBackend(result.user);
+//       return user;
+//     } catch (error) {
+//       setError(error.message);
+//       console.error("Google sign-in error:", error);
+//       throw error;
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Register new user
+//   const register = async (email, password, name = '') => {
+//     try {
+//       setError(null);
+//       setLoading(true);
+      
+//       // Create user with Firebase
+//       const result = await createUserWithEmailAndPassword(auth, email, password);
+      
+//       // Sync with backend
+//       const user = await syncUserWithBackend(result.user);
+//       return user;
+//     } catch (error) {
+//       setError(error.message);
+//       console.error("Registration error:", error);
+//       throw error;
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const logout = async () => {
+//     try {
+//       await firebaseSignOut(auth);
+//       localStorage.removeItem("firebaseToken");
+//       setUser(null);
+//       // Redirect to login page
+//       window.location.href = "/login";
+//     } catch (error) {
+//       setError(error.message);
+//       throw error;
+//     }
+//   };
+
+//   // Check authentication status on mount
 //   useEffect(() => {
-//     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+//     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
 //       if (firebaseUser) {
-//         // Store token when user logs in or refreshes
-//         await storeFirebaseToken(firebaseUser);
-//         setUser(firebaseUser);
+//         await syncUserWithBackend(firebaseUser);
 //       } else {
-//         // Clear token when user logs out
-//         localStorage.removeItem("firebaseToken");
-//         localStorage.removeItem("token");
 //         setUser(null);
+//         localStorage.removeItem("firebaseToken");
 //       }
 //       setLoading(false);
 //     });
 
-//     return () => unsub();
+//     return unsubscribe;
 //   }, []);
 
-//   // Wrap login functions to store tokens
-//   const login = async (email, password) => {
-//     const result = await signInWithEmailAndPassword(auth, email, password);
-//     await storeFirebaseToken(result.user);
-//     return result;
+//   // Check if user is admin
+//   const isAdmin = () => {
+//     return user?.role === 'admin';
 //   };
 
-//   const loginWithGoogle = async () => {
-//     const result = await signInWithPopup(auth, googleProvider);
-//     await storeFirebaseToken(result.user);
-//     return result;
+//   // Check if user is vendor
+//   const isVendor = () => {
+//     return user?.role === 'vendor';
 //   };
 
-//   const register = async ({ name, email, password, photoURL }) => {
-//     // password validation
-//     if (!/[A-Z]/.test(password))
-//       throw new Error("Password must contain uppercase");
-//     if (!/[a-z]/.test(password))
-//       throw new Error("Password must contain lowercase");
-//     if (password.length < 6)
-//       throw new Error("Password must be at least 6 characters");
-    
-//     const res = await createUserWithEmailAndPassword(auth, email, password);
-//     await updateProfile(res.user, { displayName: name, photoURL });
-//     await storeFirebaseToken(res.user);
-//     return res.user;
-//   };
-
-//   const logout = () => {
-//     localStorage.removeItem("firebaseToken");
-//     localStorage.removeItem("token");
-//     return signOut(auth);
-//   };
-
-//   // Function to refresh token (call this before API requests if needed)
-//   const refreshToken = async () => {
-//     if (auth.currentUser) {
-//       return await storeFirebaseToken(auth.currentUser);
+//   const value = {
+//     user,
+//     loading,
+//     error,
+//     // Login functions
+//     login,
+//     loginWithGoogle: signInWithGoogle,
+//     signInWithGoogle,
+//     register,
+//     logout,
+//     // Role checks
+//     isAdmin,
+//     isVendor,
+//     // Utility functions
+//     isAuthenticated: () => !!user,
+//     getToken: () => localStorage.getItem("firebaseToken"),
+//     getUserId: () => user?.uid,
+//     getUserEmail: () => user?.email,
+//     // Refresh function
+//     refreshUser: async () => {
+//       if (auth.currentUser) {
+//         return await syncUserWithBackend(auth.currentUser);
+//       }
+//       return null;
 //     }
-//     return null;
 //   };
 
 //   return (
-//     <AuthContext.Provider
-//       value={{ 
-//         user, 
-//         loading, 
-//         register, 
-//         login, 
-//         loginWithGoogle, 
-//         logout,
-//         refreshToken 
-//       }}
-//     >
+//     <AuthContext.Provider value={value}>
 //       {children}
 //     </AuthContext.Provider>
 //   );
-// }
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, googleProvider } from "../firebase.config";
-import {
+// };
+// contexts/AuthContext.jsx
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
-  signInWithPopup,
-  updateProfile,
-  getIdToken,
-} from "firebase/auth";
+  getIdToken // Import this specifically
+} from 'firebase/auth';
+import { auth } from '../firebase.config.js';
 
-const AuthContext = createContext();
+const AuthContext = createContext({});
+
 export const useAuth = () => useContext(AuthContext);
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Function to store token
-  const storeFirebaseToken = async (firebaseUser) => {
+  const provider = new GoogleAuthProvider();
+
+  // Sync user with backend - FIXED token handling
+  const syncUserWithBackend = async (firebaseUser) => {
     try {
-      if (!firebaseUser) {
-        localStorage.removeItem("firebaseToken");
-        setToken(null);
-        return null;
+      // FIX: Get fresh token with forceRefresh to avoid cached/corrupted tokens
+      const token = await getIdToken(firebaseUser, true); // forceRefresh: true
+      
+      console.log('🔑 Firebase token obtained:', {
+        length: token.length,
+        first50: token.substring(0, 50),
+        isJWT: token.includes('.') && token.split('.').length === 3
+      });
+      
+      // Validate token format
+      if (!token || token.length < 100) {
+        throw new Error('Invalid token length');
       }
       
-      const newToken = await getIdToken(firebaseUser);
-      localStorage.setItem("firebaseToken", newToken);
-      setToken(newToken);
-      return newToken;
+      if (!token.includes('.') || token.split('.').length !== 3) {
+        throw new Error('Invalid JWT format');
+      }
+      
+      localStorage.setItem("firebaseToken", token);
+      
+      // Try to get user profile from backend with retry logic
+      let retryCount = 0;
+      const maxRetries = 2;
+      
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`🔄 Attempt ${retryCount + 1} to sync user...`);
+          
+          const response = await fetch("http://localhost:5000/api/user/profile", {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          console.log('📡 Backend response status:', response.status);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('✅ User profile response:', data);
+            
+            if (data.success && data.data?.user) {
+              const userData = data.data.user;
+              setUser(userData);
+              return userData;
+            }
+          } else if (response.status === 401) {
+            console.log("🔴 401 Unauthorized - Token might be invalid");
+            
+            // If 401, refresh token and retry
+            if (retryCount < maxRetries - 1) {
+              console.log('🔄 Refreshing token and retrying...');
+              // Force refresh token
+              await getIdToken(firebaseUser, true);
+              retryCount++;
+              continue;
+            }
+          } else if (response.status === 404) {
+            // Endpoint doesn't exist
+            console.log("🔍 User profile endpoint not found");
+            break;
+          }
+          
+          // If we get here without returning, break
+          break;
+          
+        } catch (apiError) {
+          console.log(`❌ API call attempt ${retryCount + 1} failed:`, apiError.message);
+          if (retryCount < maxRetries - 1) {
+            retryCount++;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+            continue;
+          }
+          throw apiError;
+        }
+      }
+      
+      // Create local user if backend endpoints don't exist or fail
+      console.log("📝 Creating local user as fallback");
+      const localUser = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+        photoURL: firebaseUser.photoURL,
+        role: 'user', // Default role
+        _firebaseUser: firebaseUser,
+        isLocalUser: true // Flag to identify local users
+      };
+      
+      setUser(localUser);
+      return localUser;
+      
     } catch (error) {
-      console.error("Failed to get Firebase token:", error);
-      localStorage.removeItem("firebaseToken");
-      setToken(null);
-      return null;
+      console.error('❌ Failed to sync user:', error);
+      
+      // Fallback to local user
+      const localUser = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+        photoURL: firebaseUser.photoURL,
+        role: 'user',
+        _firebaseUser: firebaseUser,
+        isLocalUser: true,
+        syncError: error.message
+      };
+      
+      setUser(localUser);
+      return localUser;
     }
   };
 
-  // Function to clear all auth data
-  const clearAuthData = () => {
-    localStorage.removeItem("firebaseToken");
-    setUser(null);
-    setToken(null);
-  };
-
-  // Initialize auth state
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          // Get and store token
-          const newToken = await storeFirebaseToken(firebaseUser);
-          
-          // Set user state
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-            emailVerified: firebaseUser.emailVerified,
-            _firebaseUser: firebaseUser
-          });
-          
-          setToken(newToken);
-        } else {
-          // User is logged out
-          clearAuthData();
-        }
-      } catch (error) {
-        console.error("Error in auth state change:", error);
-        clearAuthData();
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // Login with email/password
+  // Email/password login
   const login = async (email, password) => {
     try {
+      setError(null);
       setLoading(true);
+      
+      // Sign in with Firebase
       const result = await signInWithEmailAndPassword(auth, email, password);
-      const newToken = await storeFirebaseToken(result.user);
       
-      setUser({
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-        emailVerified: result.user.emailVerified,
-        _firebaseUser: result.user
-      });
-      
-      setToken(newToken);
-      return result;
+      // Sync with backend
+      const user = await syncUserWithBackend(result.user);
+      return user;
     } catch (error) {
-      console.error("Login error:", error);
+      setError(error.message);
+      console.error("Email login error:", error);
       throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  // Login with Google
-  const loginWithGoogle = async () => {
+  // Google login
+  const signInWithGoogle = async () => {
     try {
+      setError(null);
       setLoading(true);
-      const result = await signInWithPopup(auth, googleProvider);
-      const newToken = await storeFirebaseToken(result.user);
+      console.log('🔵 Starting Google sign-in...');
       
-      setUser({
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-        emailVerified: result.user.emailVerified,
-        _firebaseUser: result.user
-      });
+      const result = await signInWithPopup(auth, provider);
+      console.log('✅ Google sign-in successful:', result.user.email);
       
-      setToken(newToken);
-      return result;
+      const user = await syncUserWithBackend(result.user);
+      return user;
     } catch (error) {
-      console.error("Google login error:", error);
+      setError(error.message);
+      console.error("Google sign-in error:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -243,40 +397,19 @@ export function AuthProvider({ children }) {
   };
 
   // Register new user
-  const register = async ({ name, email, password, photoURL }) => {
-    if (!/[A-Z]/.test(password)) {
-      throw new Error("Password must contain at least one uppercase letter");
-    }
-    if (!/[a-z]/.test(password)) {
-      throw new Error("Password must contain at least one lowercase letter");
-    }
-    if (password.length < 6) {
-      throw new Error("Password must be at least 6 characters");
-    }
-    
+  const register = async (email, password, name = '') => {
     try {
+      setError(null);
       setLoading(true);
-      const res = await createUserWithEmailAndPassword(auth, email, password);
       
-      await updateProfile(res.user, { 
-        displayName: name, 
-        photoURL: photoURL || null 
-      });
+      // Create user with Firebase
+      const result = await createUserWithEmailAndPassword(auth, email, password);
       
-      const newToken = await storeFirebaseToken(res.user);
-      
-      setUser({
-        uid: res.user.uid,
-        email: res.user.email,
-        displayName: name,
-        photoURL: photoURL || null,
-        emailVerified: res.user.emailVerified,
-        _firebaseUser: res.user
-      });
-      
-      setToken(newToken);
-      return res.user;
+      // Sync with backend
+      const user = await syncUserWithBackend(result.user);
+      return user;
     } catch (error) {
+      setError(error.message);
       console.error("Registration error:", error);
       throw error;
     } finally {
@@ -284,63 +417,84 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Logout
   const logout = async () => {
     try {
-      setLoading(true);
-      await signOut(auth);
-      clearAuthData();
+      await firebaseSignOut(auth);
+      localStorage.removeItem("firebaseToken");
+      setUser(null);
+      // Redirect to login page
+      window.location.href = "/login";
     } catch (error) {
-      console.error("Logout error:", error);
+      setError(error.message);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Refresh token manually
-  const refreshToken = async () => {
-    try {
-      if (auth.currentUser) {
-        const newToken = await storeFirebaseToken(auth.currentUser);
-        return newToken;
+  // Check authentication status on mount
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('👤 Firebase auth state changed:', firebaseUser ? firebaseUser.email : 'No user');
+      
+      if (firebaseUser) {
+        await syncUserWithBackend(firebaseUser);
+      } else {
+        setUser(null);
+        localStorage.removeItem("firebaseToken");
       }
-      return null;
-    } catch (error) {
-      console.error("Token refresh error:", error);
-      return null;
-    }
-  };
+      setLoading(false);
+    });
 
-  // Get current token
-  const getToken = () => {
-    return token || localStorage.getItem("firebaseToken");
-  };
-
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    return !!user && !!getToken();
-  };
+    return unsubscribe;
+  }, []);
 
   // Check if user is admin
   const isAdmin = () => {
-    return user?.role === 'admin' || user?.email?.includes('admin');
+    return user?.role === 'admin';
+  };
+
+  // Check if user is vendor
+  const isVendor = () => {
+    return user?.role === 'vendor';
   };
 
   const value = {
     user,
-    token,
     loading,
+    error,
+    // Login functions
     login,
-    loginWithGoogle,
+    loginWithGoogle: signInWithGoogle,
+    signInWithGoogle,
     register,
     logout,
-    refreshToken,
-    getToken,
-    isAuthenticated,
+    // Role checks
     isAdmin,
+    isVendor,
+    // Utility functions
+    isAuthenticated: () => !!user,
+    getToken: () => localStorage.getItem("firebaseToken"),
     getUserId: () => user?.uid,
     getUserEmail: () => user?.email,
+    // Debug functions
+    debugToken: async () => {
+      if (auth.currentUser) {
+        const token = await getIdToken(auth.currentUser);
+        console.log('🔍 Debug token:', {
+          token: token.substring(0, 100) + '...',
+          length: token.length,
+          parts: token.split('.').length
+        });
+        return token;
+      }
+      return null;
+    },
+    // Refresh function
+    refreshUser: async () => {
+      if (auth.currentUser) {
+        return await syncUserWithBackend(auth.currentUser);
+      }
+      return null;
+    }
   };
 
   return (
@@ -348,4 +502,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
