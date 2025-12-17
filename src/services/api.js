@@ -3,15 +3,20 @@
 
 // const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
-// // Get token from localStorage (alias getIdToken for compatibility)
+// // Get token from localStorage
 // export function getToken() {
-//   return localStorage.getItem("firebaseToken");
+//   const token = localStorage.getItem("firebaseToken");
+//   console.log("🔑 getToken called, token exists:", !!token);
+//   if (token) {
+//     console.log("📏 Token length:", token.length);
+//     console.log("🔍 First 50 chars:", token.substring(0, 50));
+//   }
+//   return token;
 // }
 
-// // Alias getIdToken for compatibility with existing code
 // export const getIdToken = getToken;
 
-// // Create axios instance with default config
+// // Create axios instance
 // const apiClient = axios.create({
 //   baseURL: API_BASE,
 //   timeout: 15000,
@@ -21,54 +26,51 @@
 //   },
 // });
 
-// // Request interceptor to add auth token
+// // Request interceptor with better logging
 // apiClient.interceptors.request.use(
 //   (config) => {
 //     const token = getToken();
+//     console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`);
+    
 //     if (token) {
 //       config.headers.Authorization = `Bearer ${token}`;
+//       console.log("✅ Token added to headers");
+//     } else {
+//       console.log("⚠️ No token available for request");
 //     }
+    
 //     return config;
 //   },
 //   (error) => {
+//     console.error("❌ Request interceptor error:", error);
 //     return Promise.reject(error);
 //   }
 // );
 
-// // Response interceptor for error handling
+// // Response interceptor
 // apiClient.interceptors.response.use(
 //   (response) => {
-//     // Log successful responses in development
-//     if (import.meta.env.DEV) {
-//       console.log(`✅ API ${response.config.method?.toUpperCase()} ${response.config.url}:`, {
-//         status: response.status,
-//         data: response.data,
-//       });
-//     }
+//     console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
 //     return response;
 //   },
 //   (error) => {
 //     console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-//       message: error.message,
-//       code: error.code,
 //       status: error.response?.status,
-//       data: error.response?.data,
+//       message: error.response?.data?.message || error.message,
 //     });
 
-//     // Handle specific error cases
-//     if (error.code === "ERR_NETWORK" || !error.response) {
-//       console.error("🔴 Network Error - Backend might not be running");
-//       return Promise.reject(new Error("Backend server is not available. Please start the server on port 5000."));
+//     // Handle specific errors
+//     if (error.code === "ERR_NETWORK") {
+//       console.error("🔴 Network Error - Check if backend is running on port 5000");
 //     }
 
 //     if (error.response?.status === 401) {
-//       console.error("🔴 Authentication Error - Token invalid or expired");
+//       console.error("🔴 401 Unauthorized - Token invalid or expired");
 //       localStorage.removeItem("firebaseToken");
-//       window.location.href = "/login";
 //     }
 
 //     if (error.response?.status === 403) {
-//       console.error("🔴 Authorization Error - Insufficient permissions");
+//       console.error("🔴 403 Forbidden - Insufficient permissions");
 //     }
 
 //     return Promise.reject(error);
@@ -78,6 +80,7 @@
 // // Generic API request
 // export const apiRequest = async (endpoint, method = "GET", data = null, params = {}) => {
 //   try {
+//     console.log(`📤 API Request: ${method} ${endpoint}`);
 //     const response = await apiClient({
 //       url: endpoint,
 //       method: method.toUpperCase(),
@@ -86,6 +89,7 @@
 //     });
 //     return response;
 //   } catch (error) {
+//     console.error(`❌ API Request failed: ${method} ${endpoint}`, error.message);
 //     throw error;
 //   }
 // };
@@ -111,88 +115,72 @@
 // };
 
 // // ========== PUBLIC ENDPOINTS ==========
-// export const getAdvertisedTickets = () => apiRequest("/api/advertised");
-// export const getAllTickets = (params = {}) => apiRequest("/api/tickets", "GET", null, params);
-// export const getTicketById = (id) => apiRequest(`/api/tickets/${id}`);
+// export const getAdvertisedTickets = () => apiGet("/api/advertised");
+// export const getAllTickets = (params = {}) => apiGet("/api/tickets", params);
+// export const getTicketById = (id) => apiGet(`/api/tickets/${id}`);
+// export const getHealthStatus = () => apiGet("/api/health");
 
 // // ========== USER ENDPOINTS ==========
-// export const getUserProfile = () => apiRequest("/api/user/profile");
-// export const updateUserProfile = (data) => apiRequest("/api/user/profile", "PUT", data);
-// export const getUserDashboard = () => apiRequest("/api/user/dashboard");
-// export const getMyBookings = () => apiRequest("/api/my-bookings");
-// export const createBooking = (data) => apiRequest("/api/bookings", "POST", data);
+// export const getUserProfile = () => apiGet("/api/user/profile");
+// export const updateUserProfile = (data) => apiPut("/api/user/profile", data);
+// export const getUserDashboard = () => apiGet("/api/user/dashboard");
+// export const getMyBookings = () => apiGet("/api/my-bookings");
+// export const createBooking = (data) => apiPost("/api/bookings", data);
 
 // // ========== VENDOR ENDPOINTS ==========
-// export const submitVendorApplication = (data) => apiRequest("/api/apply-vendor", "POST", data);
-// export const getMyVendorApplication = () => apiRequest("/api/my-vendor-application");
-// export const getVendorTickets = () => apiRequest("/api/vendor/tickets");
-// export const createVendorTicket = (data) => apiRequest("/api/vendor/tickets", "POST", data);
+// export const submitVendorApplication = (data) => apiPost("/api/apply-vendor", data);
+// export const getMyVendorApplication = () => apiGet("/api/my-vendor-application");
+// export const getVendorTickets = () => apiGet("/api/vendor/tickets");
+// export const createVendorTicket = (data) => apiPost("/api/vendor/tickets", data);
 
 // // ========== ADMIN ENDPOINTS ==========
-// export const getAdminDashboard = () => apiRequest("/api/admin/dashboard");
-// export const getAdminTickets = (filter = {}) => apiRequest("/api/admin/tickets", "GET", null, filter);
-// export const verifyTicket = (id, status) => apiRequest(`/api/admin/tickets/${id}/verify`, "PUT", { status });
-// export const getAdminUsers = (filter = {}) => apiRequest("/api/admin/users", "GET", null, filter);
-// export const updateUserRole = (userId, role) => apiRequest(`/api/admin/users/${userId}/role`, "PUT", { role });
-// export const getVendorApplications = (filter = {}) => apiRequest("/api/admin/vendor-applications", "GET", null, filter);
-// export const getVendorApplicationById = (id) => apiRequest(`/api/admin/vendor-applications/${id}`);
-// export const reviewVendorApplication = (id, data) => apiRequest(`/api/admin/vendor-applications/${id}/review`, "PUT", data);
+// export const getAdminDashboard = () => apiGet("/api/admin/dashboard");
+// export const getAdminTickets = (filter = {}) => apiGet("/api/admin/tickets", filter);
+// export const verifyTicket = (id, status) => apiPut(`/api/admin/tickets/${id}/verify`, { status });
+// export const getAdminUsers = (filter = {}) => apiGet("/api/admin/users", filter);
+// export const updateUserRole = (userId, role) => apiPut(`/api/admin/users/${userId}/role`, { role });
+// export const getVendorApplications = (filter = {}) => apiGet("/api/admin/vendor-applications", filter);
+// export const getVendorApplicationById = (id) => apiGet(`/api/admin/vendor-applications/${id}`);
+// export const reviewVendorApplication = (id, data) => apiPut(`/api/admin/vendor-applications/${id}/review`, data);
+// export const getAdminBookings = (filter = {}) => apiGet("/api/admin/bookings", filter);
+// export const updateBookingStatus = (bookingId, status) => apiPut(`/api/admin/bookings/${bookingId}/status`, { status });
+// export const getAdminReports = (params = {}) => apiGet("/api/admin/reports", params);
 
-// // ========== NEW ADMIN ENDPOINTS ==========
-// export const getAdminBookings = (filter = {}) => apiRequest("/api/admin/bookings", "GET", null, filter);
-// export const updateBookingStatus = (bookingId, status) => apiRequest(`/api/admin/bookings/${bookingId}/status`, "PUT", { status });
-// export const getAdminReports = (params = {}) => apiRequest("/api/admin/reports", "GET", null, params);
+// // ========== DEBUG ENDPOINTS ==========
+// export const checkAuthStatus = () => apiGet("/api/debug/auth-check");
+// export const testToken = (token) => apiPost("/api/debug/token-check", { token });
+// export const makeMeAdmin = () => apiPost("/api/debug/make-me-admin");
+// export const getDebugUsers = () => apiGet("/api/debug/users");
 
-// // ========== HEALTH & UTILITY ==========
-// export const getHealthStatus = () => apiRequest("/api/health");
+// // ========== UTILITY ==========
 // export const testBackendConnection = async () => {
 //   try {
+//     console.log("🔍 Testing backend connection...");
 //     const response = await fetch(`${API_BASE}/api/health`);
+//     const data = await response.json();
 //     return {
 //       success: response.ok,
 //       status: response.status,
-//       url: API_BASE,
+//       data: data,
+//       message: "Backend is running"
 //     };
 //   } catch (error) {
 //     return {
 //       success: false,
 //       message: error.message,
-//       url: API_BASE,
+//       url: API_BASE
 //     };
 //   }
 // };
 
-// // ========== HELPER FUNCTIONS ==========
-// export const formatDate = (dateString) => {
-//   if (!dateString) return "N/A";
-//   try {
-//     return new Date(dateString).toLocaleDateString("en-US", {
-//       year: "numeric",
-//       month: "short",
-//       day: "numeric",
-//       hour: "2-digit",
-//       minute: "2-digit",
-//     });
-//   } catch {
-//     return "Invalid Date";
-//   }
-// };
-
-// export const formatCurrency = (amount, currency = "USD") => {
-//   return new Intl.NumberFormat("en-US", {
-//     style: "currency",
-//     currency: currency,
-//   }).format(amount);
-// };
-
-// // ========== DEFAULT EXPORT ==========
+// // Default export
 // const api = {
 //   // Core methods
 //   request: apiRequest,
-//   get: (endpoint, params) => apiRequest(endpoint, "GET", null, params),
-//   post: (endpoint, data) => apiRequest(endpoint, "POST", data),
-//   put: (endpoint, data) => apiRequest(endpoint, "PUT", data),
-//   delete: (endpoint) => apiRequest(endpoint, "DELETE"),
+//   get: apiGet,
+//   post: apiPost,
+//   put: apiPut,
+//   delete: apiDelete,
   
 //   // Auth
 //   getToken,
@@ -202,6 +190,7 @@
 //   getAdvertisedTickets,
 //   getAllTickets,
 //   getTicketById,
+//   getHealthStatus,
   
 //   // User
 //   getUserProfile,
@@ -229,24 +218,31 @@
 //   updateBookingStatus,
 //   getAdminReports,
   
+//   // Debug
+//   checkAuthStatus,
+//   testToken,
+//   makeMeAdmin,
+//   getDebugUsers,
+  
 //   // Utility
-//   getHealthStatus,
 //   testBackendConnection,
-//   formatDate,
-//   formatCurrency,
 // };
 
 // export default api;
-// services/api.js
-// services/api.js
-// services/api.js
+// services/api.js - COMPLETE FIXED VERSION
 import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 // Get token from localStorage
 export function getToken() {
-  return localStorage.getItem("firebaseToken");
+  const token = localStorage.getItem("firebaseToken");
+  console.log("🔑 getToken called, token exists:", !!token);
+  if (token) {
+    console.log("📏 Token length:", token.length);
+    console.log("🔍 First 50 chars:", token.substring(0, 50));
+  }
+  return token;
 }
 
 export const getIdToken = getToken;
@@ -254,23 +250,30 @@ export const getIdToken = getToken;
 // Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE,
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// Request interceptor
+// Request interceptor with better logging
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
+    console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`);
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("✅ Token added to headers");
+    } else {
+      console.log("⚠️ No token available for request");
     }
+    
     return config;
   },
   (error) => {
+    console.error("❌ Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
@@ -278,9 +281,29 @@ apiClient.interceptors.request.use(
 // Response interceptor
 apiClient.interceptors.response.use(
   (response) => {
+    console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`);
     return response;
   },
   (error) => {
+    console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+    });
+
+    // Handle specific errors
+    if (error.code === "ERR_NETWORK") {
+      console.error("🔴 Network Error - Check if backend is running on port 5000");
+    }
+
+    if (error.response?.status === 401) {
+      console.error("🔴 401 Unauthorized - Token invalid or expired");
+      localStorage.removeItem("firebaseToken");
+    }
+
+    if (error.response?.status === 403) {
+      console.error("🔴 403 Forbidden - Insufficient permissions");
+    }
+
     return Promise.reject(error);
   }
 );
@@ -288,6 +311,7 @@ apiClient.interceptors.response.use(
 // Generic API request
 export const apiRequest = async (endpoint, method = "GET", data = null, params = {}) => {
   try {
+    console.log(`📤 API Request: ${method} ${endpoint}`);
     const response = await apiClient({
       url: endpoint,
       method: method.toUpperCase(),
@@ -296,6 +320,7 @@ export const apiRequest = async (endpoint, method = "GET", data = null, params =
     });
     return response;
   } catch (error) {
+    console.error(`❌ API Request failed: ${method} ${endpoint}`, error.message);
     throw error;
   }
 };
@@ -324,6 +349,7 @@ export const apiDelete = (endpoint) => {
 export const getAdvertisedTickets = () => apiGet("/api/advertised");
 export const getAllTickets = (params = {}) => apiGet("/api/tickets", params);
 export const getTicketById = (id) => apiGet(`/api/tickets/${id}`);
+export const getHealthStatus = () => apiGet("/api/health");
 
 // ========== USER ENDPOINTS ==========
 export const getUserProfile = () => apiGet("/api/user/profile");
@@ -341,7 +367,7 @@ export const createVendorTicket = (data) => apiPost("/api/vendor/tickets", data)
 // ========== ADMIN ENDPOINTS ==========
 export const getAdminDashboard = () => apiGet("/api/admin/dashboard");
 export const getAdminTickets = (filter = {}) => apiGet("/api/admin/tickets", filter);
-export const verifyTicket = (id, status) => apiPut(`/api/admin/tickets/${id}/verify`, { status }); // ADDED THIS
+export const verifyTicket = (id, status) => apiPut(`/api/admin/tickets/${id}/verify`, { status });
 export const getAdminUsers = (filter = {}) => apiGet("/api/admin/users", filter);
 export const updateUserRole = (userId, role) => apiPut(`/api/admin/users/${userId}/role`, { role });
 export const getVendorApplications = (filter = {}) => apiGet("/api/admin/vendor-applications", filter);
@@ -351,15 +377,28 @@ export const getAdminBookings = (filter = {}) => apiGet("/api/admin/bookings", f
 export const updateBookingStatus = (bookingId, status) => apiPut(`/api/admin/bookings/${bookingId}/status`, { status });
 export const getAdminReports = (params = {}) => apiGet("/api/admin/reports", params);
 
-// ========== DEBUG & UTILITY ==========
+// ========== DEBUG & TESTING ENDPOINTS ==========
+export const checkAuthStatus = () => apiGet("/api/debug/auth-check");
+export const testToken = (token) => apiPost("/api/debug/token-check", { token });
+export const makeMeAdmin = () => apiPost("/api/debug/make-me-admin");
+export const getDebugUsers = () => apiGet("/api/debug/users");
+export const getDebugTickets = () => apiGet("/api/debug/tickets");
+export const approveAllTickets = () => apiPost("/api/debug/approve-all");
+export const createSampleTickets = () => apiPost("/api/debug/create-sample-tickets");
+export const testAdminAccess = () => apiGet("/api/debug/test-admin");
+export const forceSyncUser = (email) => apiGet(`/api/debug/force-sync/${email}`);
+
+// ========== TEST & UTILITY FUNCTIONS ==========
 export const testBackendConnection = async () => {
   try {
-    const response = await fetch(`${API_BASE}/`);
+    console.log("🔍 Testing backend connection...");
+    const response = await fetch(`${API_BASE}/api/health`);
+    const data = await response.json();
     return {
       success: response.ok,
       status: response.status,
-      url: API_BASE,
-      message: response.ok ? "Backend is running" : "Backend responded with error"
+      data: data,
+      message: "Backend is running"
     };
   } catch (error) {
     return {
@@ -367,6 +406,178 @@ export const testBackendConnection = async () => {
       message: error.message,
       url: API_BASE
     };
+  }
+};
+
+// Test user authentication flow
+export const testAuthFlow = async () => {
+  try {
+    console.log("🧪 Testing authentication flow...");
+    
+    const results = {
+      backendStatus: null,
+      tokenStatus: null,
+      profileStatus: null,
+      adminStatus: null
+    };
+    
+    // 1. Test backend connection
+    try {
+      const backendRes = await testBackendConnection();
+      results.backendStatus = backendRes;
+      console.log("✅ Backend connection:", backendRes.success ? "OK" : "FAILED");
+    } catch (error) {
+      results.backendStatus = { success: false, error: error.message };
+    }
+    
+    // 2. Test token
+    const token = getToken();
+    results.tokenStatus = {
+      hasToken: !!token,
+      tokenLength: token?.length || 0
+    };
+    console.log("✅ Token status:", results.tokenStatus.hasToken ? "Present" : "Missing");
+    
+    // 3. Test profile endpoint
+    try {
+      const profileRes = await getUserProfile();
+      results.profileStatus = {
+        success: true,
+        email: profileRes.data.data.user.email,
+        role: profileRes.data.data.user.role
+      };
+      console.log("✅ Profile access:", `Email: ${results.profileStatus.email}, Role: ${results.profileStatus.role}`);
+    } catch (error) {
+      results.profileStatus = { 
+        success: false, 
+        error: error.message,
+        status: error.response?.status 
+      };
+    }
+    
+    // 4. Test admin endpoint (if user is admin)
+    if (results.profileStatus.success && results.profileStatus.role === 'admin') {
+      try {
+        const adminRes = await getAdminDashboard();
+        results.adminStatus = {
+          success: true,
+          data: adminRes.data.data
+        };
+        console.log("✅ Admin access: Granted");
+      } catch (error) {
+        results.adminStatus = { 
+          success: false, 
+          error: error.message,
+          status: error.response?.status 
+        };
+      }
+    } else {
+      results.adminStatus = { 
+        success: false, 
+        error: "User is not admin or profile not accessible",
+        userRole: results.profileStatus.role 
+      };
+    }
+    
+    return results;
+    
+  } catch (error) {
+    console.error("❌ Auth flow test failed:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Force admin mode utility
+export const forceAdminMode = async () => {
+  try {
+    console.log("👑 Attempting to force admin mode...");
+    
+    // Step 1: Check current user
+    const profile = await getUserProfile();
+    console.log("Current user:", profile.data.data.user.email, "Role:", profile.data.data.user.role);
+    
+    // Step 2: Make admin if not already
+    if (profile.data.data.user.role !== 'admin') {
+      console.log("⚠️ User is not admin, making admin...");
+      const makeAdminRes = await makeMeAdmin();
+      console.log("Make admin result:", makeAdminRes.data.message);
+      
+      // Step 3: Refresh profile
+      const newProfile = await getUserProfile();
+      console.log("New role:", newProfile.data.data.user.role);
+      
+      return {
+        success: true,
+        message: "Admin mode forced successfully",
+        oldRole: profile.data.data.user.role,
+        newRole: newProfile.data.data.user.role,
+        user: newProfile.data.data.user
+      };
+    } else {
+      return {
+        success: true,
+        message: "User is already admin",
+        role: profile.data.data.user.role,
+        user: profile.data.data.user
+      };
+    }
+  } catch (error) {
+    console.error("❌ Force admin mode failed:", error);
+    return {
+      success: false,
+      error: error.message,
+      code: error.response?.status
+    };
+  }
+};
+
+// Debug user info
+export const debugUserInfo = async () => {
+  try {
+    console.log("🔍 Debugging user info...");
+    
+    const results = {};
+    
+    // 1. Local storage info
+    results.localStorage = {
+      hasToken: !!localStorage.getItem("firebaseToken"),
+      hasUser: !!localStorage.getItem("user"),
+      tokenLength: localStorage.getItem("firebaseToken")?.length || 0
+    };
+    
+    // 2. Backend users list
+    try {
+      const usersRes = await getDebugUsers();
+      results.allUsers = usersRes.data.data.users;
+      results.totalUsers = usersRes.data.data.count;
+      
+      // Find admin user
+      results.adminUser = results.allUsers.find(u => u.email === "mahdiashan9@gmail.com");
+    } catch (error) {
+      results.allUsersError = error.message;
+    }
+    
+    // 3. Current auth status
+    try {
+      const authRes = await checkAuthStatus();
+      results.authStatus = authRes.data.data;
+    } catch (error) {
+      results.authStatusError = error.message;
+    }
+    
+    // 4. Current profile
+    try {
+      const profileRes = await getUserProfile();
+      results.currentProfile = profileRes.data.data.user;
+    } catch (error) {
+      results.profileError = error.message;
+    }
+    
+    return results;
+    
+  } catch (error) {
+    console.error("❌ Debug user info failed:", error);
+    return { success: false, error: error.message };
   }
 };
 
@@ -387,6 +598,7 @@ const api = {
   getAdvertisedTickets,
   getAllTickets,
   getTicketById,
+  getHealthStatus,
   
   // User
   getUserProfile,
@@ -401,10 +613,10 @@ const api = {
   getVendorTickets,
   createVendorTicket,
   
-  // Admin - ALL EXPORTS INCLUDED
+  // Admin
   getAdminDashboard,
   getAdminTickets,
-  verifyTicket, // ADDED
+  verifyTicket,
   getAdminUsers,
   updateUserRole,
   getVendorApplications,
@@ -414,8 +626,22 @@ const api = {
   updateBookingStatus,
   getAdminReports,
   
-  // Utility
+  // Debug & Testing - ALL EXPORTS INCLUDED
+  checkAuthStatus,
+  testToken,
+  makeMeAdmin,
+  getDebugUsers,
+  getDebugTickets,
+  approveAllTickets,
+  createSampleTickets,
+  testAdminAccess,
+  forceSyncUser,
+  
+  // Utility functions
   testBackendConnection,
+  testAuthFlow,
+  forceAdminMode,
+  debugUserInfo,
 };
 
 export default api;

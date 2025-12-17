@@ -117,6 +117,7 @@ import AdminVendorApplications from "./components/admin/AdminVendorApplications.
 import AdminBookings from "./components/admin/AdminBookings.jsx";
 import AdminSettings from "./components/admin/AdminSettings.jsx";
 import AdminReports from "./components/admin/AdminReports.jsx";
+import DebugAuth from "./components/DebugAuth.jsx";
 
 function AppRoutes() {
   return (
@@ -175,6 +176,9 @@ function AppRoutes() {
         <Route path="reports" element={<AdminReports />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
+     
+<Route path="/debug-auth" element={<DebugAuth />} />
+
     </Routes>
   );
 }
