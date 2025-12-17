@@ -595,12 +595,12 @@ export default function Home() {
             >
               Browse Tickets
             </Link>
-            <Link 
+            {/* <Link 
               to="/login" 
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-sky-600 px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300"
             >
               Sign In
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>
@@ -642,14 +642,14 @@ export default function Home() {
               </svg>
             </div>
             <div>
-              <span className="font-medium text-green-800">
+              {/* <span className="font-medium text-green-800">
                 ✅ Connected to backend server
-              </span>
-              {tickets.length > 0 && tickets[0]._id?.startsWith('sample-') && (
+              </span> */}
+              {/* {tickets.length > 0 && tickets[0]._id?.startsWith('sample-') && (
                 <span className="ml-2 text-sm text-green-600">
                   (Using real API, but showing fallback data)
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -666,7 +666,7 @@ export default function Home() {
               {loading 
                 ? 'Loading tickets from backend...' 
                 : backendStatus === "connected" 
-                  ? `Showing ${tickets.length} real tickets from database`
+                  ? `Showing ${tickets.length} featured tickets`
                   : `Showing ${tickets.length} sample tickets (backend offline)`
               }
             </p>
