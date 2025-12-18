@@ -1,6 +1,5 @@
-
 // import React from "react";
-// import { Routes, Route, BrowserRouter } from "react-router-dom";
+// import { Routes, Route } from "react-router-dom";
 // import { AuthProvider } from "./contexts/AuthContext.jsx";
 // import MainLayout from "./layouts/MainLayout.jsx";
 // import Home from "./pages/Home.jsx";
@@ -22,6 +21,7 @@
 // import AdminBookings from "./components/admin/AdminBookings.jsx";
 // import AdminSettings from "./components/admin/AdminSettings.jsx";
 // import AdminReports from "./components/admin/AdminReports.jsx";
+// import DebugAuth from "./components/DebugAuth.jsx";
 
 // function AppRoutes() {
 //   return (
@@ -80,20 +80,20 @@
 //         <Route path="reports" element={<AdminReports />} />
 //         <Route path="settings" element={<AdminSettings />} />
 //       </Route>
+     
+// <Route path="/debug-auth" element={<DebugAuth />} />
+
 //     </Routes>
 //   );
 // }
 
 // export default function App() {
 //   return (
-//     <BrowserRouter>
-//       <AuthProvider>
-//         <AppRoutes />
-//       </AuthProvider>
-//     </BrowserRouter>
+//     <AuthProvider>
+//       <AppRoutes />
+//     </AuthProvider>
 //   );
 // }
-// App.jsx - FIXED VERSION
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
@@ -104,6 +104,7 @@ import TicketDetails from "./pages/TicketDetails.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import Payment from "./pages/Payment.jsx"; // ADD THIS IMPORT
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ApplyForVendor from "./pages/vendor/ApplyVendor.jsx";
@@ -118,6 +119,12 @@ import AdminBookings from "./components/admin/AdminBookings.jsx";
 import AdminSettings from "./components/admin/AdminSettings.jsx";
 import AdminReports from "./components/admin/AdminReports.jsx";
 import DebugAuth from "./components/DebugAuth.jsx";
+import MyBookings from "./pages/MyBookings.jsx";
+import BookingDetails from "./pages/BookingDetails.jsx";
+
+// User booking routes
+// import MyBookings from "./pages/MyBookings.jsx"; // You might want to create this
+// import BookingDetails from "./pages/BookingDetails.jsx"; // You might want to create this
 
 function AppRoutes() {
   return (
@@ -147,10 +154,36 @@ function AppRoutes() {
           }
         />
         <Route
-          path="dashboard/*"
+          path="dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        {/* ADD THESE PAYMENT ROUTES */}
+        <Route
+          path="payment"
+          element={
+            <ProtectedRoute>
+              <Payment />
+            </ProtectedRoute>
+          }
+        />
+        {/* Optional: Add booking routes if you have them */}
+        <Route
+          path="my-bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="my-bookings/:id"
+          element={
+            <ProtectedRoute>
+              <BookingDetails />
             </ProtectedRoute>
           }
         />
@@ -177,7 +210,7 @@ function AppRoutes() {
         <Route path="settings" element={<AdminSettings />} />
       </Route>
      
-<Route path="/debug-auth" element={<DebugAuth />} />
+      <Route path="/debug-auth" element={<DebugAuth />} />
 
     </Routes>
   );
