@@ -287,7 +287,7 @@ export default function Navbar() {
                             </Link>
 
                             {/* Vendor specific links */}
-                            {user.role === "vendor" && (
+                            {/* {user.role === "vendor" && (
                               <Link
                                 to="/vendor/dashboard"
                                 className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
@@ -296,7 +296,17 @@ export default function Navbar() {
                                 <span className="text-lg">🏪</span>
                                 <span>Vendor Dashboard</span>
                               </Link>
-                            )}
+                            )} */}
+                            {user?.role === "vendor" && (
+  <Link
+    to="/vendor/dashboard"
+    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+    onClick={() => setIsProfileMenuOpen(false)}
+  >
+    <span className="text-xl">🏪</span>
+    <span className="font-medium">Vendor Dashboard</span>
+  </Link>
+)}
 
                             {/* Admin specific links */}
                             {user.role === "admin" && (

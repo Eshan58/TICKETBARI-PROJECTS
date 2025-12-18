@@ -167,6 +167,37 @@ export const updateVendorTicket = (id, data) =>
 export const deleteVendorTicket = (id) =>
   apiDelete(`/api/vendor/tickets/${id}`);
 
+
+
+// // Vendor Dashboard Endpoints
+// export const getVendorDashboardStats = () => apiGet("/api/vendor/dashboard/stats");
+// export const getVendorCards = () => apiGet("/api/vendor/cards");
+// export const createVendorCard = (data) => apiPost("/api/vendor/cards", data);
+// export const updateVendorCard = (id, data) => apiPut(`/api/vendor/cards/${id}`, data);
+// export const deleteVendorCard = (id) => apiDelete(`/api/vendor/cards/${id}`);
+// // export const getVendorApplications = (filter = {}) => apiGet("/api/vendor/applications", filter);
+// export const approveVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/approve`);
+// export const rejectVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/reject`)
+
+
+
+
+// Vendor Dashboard Endpoints
+export const getVendorDashboardStats = () => apiGet("/api/vendor/dashboard/stats");
+export const getVendorCards = () => apiGet("/api/vendor/cards");
+export const createVendorCard = (data) => apiPost("/api/vendor/cards", data);
+export const updateVendorCard = (id, data) => apiPut(`/api/vendor/cards/${id}`, data);
+export const deleteVendorCard = (id) => apiDelete(`/api/vendor/cards/${id}`);
+// export const getVendorApplications = (filter = {}) => apiGet("/api/vendor/applications", filter);
+export const approveVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/approve`);
+export const rejectVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/reject`);
+
+
+
+
+
+
+
 // ========== ADMIN ENDPOINTS ==========
 export const getAdminDashboard = () => apiGet("/api/admin/dashboard");
 export const getAdminTickets = (filter = {}) =>
@@ -607,6 +638,15 @@ const api = {
   createVendorTicket,
   updateVendorTicket,
   deleteVendorTicket,
+  // Vendor
+  getVendorDashboardStats, // NEW
+  getVendorCards, // NEW
+  createVendorCard, // NEW
+  updateVendorCard, // NEW
+  deleteVendorCard, // NEW
+  getVendorApplications, // NEW
+  approveVendorApplication, // NEW
+  rejectVendorApplication, // NEW
 
   // Admin
   getAdminDashboard,
