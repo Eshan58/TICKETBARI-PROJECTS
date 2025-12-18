@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiGet, verifyTicket } from "../../services/api";
+import { TbCurrencyTaka } from "react-icons/tb";
 
 const AdminTickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -213,8 +214,8 @@ const AdminTickets = () => {
                         <span className="mx-2 text-gray-400">→</span>
                         <span className="text-gray-900">{ticket.to || "N/A"}</span>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {ticket.transportType?.toUpperCase()} • ${ticket.price || 0}
+                      <div className="text-sm text-gray-500 flex items-center">
+                        {ticket.transportType?.toUpperCase()} • <TbCurrencyTaka />{ticket.price || 0}
                         {ticket.quantity && (
                           <span className="ml-2">• Qty: {ticket.quantity}</span>
                         )}

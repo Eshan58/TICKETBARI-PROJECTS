@@ -1,6 +1,7 @@
 // components/admin/AdminBookings.jsx
 import React, { useState, useEffect } from "react";
 import { getAdminBookings, updateBookingStatus } from "../../services/api";
+import { TbCurrencyTaka } from "react-icons/tb";
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -203,8 +204,8 @@ const AdminBookings = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        ${booking.totalPrice}
+                      <div className="text-sm font-medium text-gray-900 flex items-center">
+                        <TbCurrencyTaka />{booking.totalPrice}
                       </div>
                     </td>
                     <td className="px-6 py-4">
