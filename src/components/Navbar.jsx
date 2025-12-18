@@ -452,23 +452,23 @@ export default function Navbar() {
                           <span>Dashboard</span>
                         </Link>
 
-                        <Link
+                        {/* <Link
                           to="/user/profile"
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <span className="text-lg">👤</span>
                           <span>My Profile</span>
-                        </Link>
+                        </Link> */}
 
-                        <Link
+                        {/* <Link
                           to="/my-bookings"
                           className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
                           <span className="text-lg">🎫</span>
                           <span>My Bookings</span>
-                        </Link>
+                        </Link> */}
 
                         {user.role === "vendor" && (
                           <Link
