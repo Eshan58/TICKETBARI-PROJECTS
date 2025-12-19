@@ -1,3 +1,4 @@
+
 // import React from "react";
 // import { Routes, Route } from "react-router-dom";
 // import { AuthProvider } from "./contexts/AuthContext.jsx";
@@ -8,10 +9,14 @@
 // import Login from "./pages/Login.jsx";
 // import Register from "./pages/Register.jsx";
 // import Dashboard from "./pages/Dashboard.jsx";
-// import Payment from "./pages/Payment.jsx"; // ADD THIS IMPORT
+// import Payment from "./pages/Payment.jsx";
 // import NotFound from "./pages/NotFound.jsx";
 // import ProtectedRoute from "./components/ProtectedRoute.jsx";
 // import ApplyForVendor from "./pages/vendor/ApplyVendor.jsx";
+
+// // Vendor Components
+// import VendorDashboard from "./components/Vendor/VendorDashboard.jsx";
+// import VendorProtectedRoute from "./components/Vendor/VendorProtectedRoute.jsx";
 
 // // Admin Components
 // import AdminLayout from "./components/admin/AdminLayout.jsx";
@@ -23,12 +28,10 @@
 // import AdminSettings from "./components/admin/AdminSettings.jsx";
 // import AdminReports from "./components/admin/AdminReports.jsx";
 // import DebugAuth from "./components/DebugAuth.jsx";
-// import MyBookings from "./pages/MyBookings.jsx";
-// import BookingDetails from "./pages/BookingDetails.jsx";
 
 // // User booking routes
-// // import MyBookings from "./pages/MyBookings.jsx"; // You might want to create this
-// // import BookingDetails from "./pages/BookingDetails.jsx"; // You might want to create this
+// import MyBookings from "./pages/MyBookings.jsx";
+// import BookingDetails from "./pages/BookingDetails.jsx";
 
 // function AppRoutes() {
 //   return (
@@ -65,7 +68,8 @@
 //             </ProtectedRoute>
 //           }
 //         />
-//         {/* ADD THESE PAYMENT ROUTES */}
+        
+//         {/* Payment Route */}
 //         <Route
 //           path="payment"
 //           element={
@@ -74,7 +78,8 @@
 //             </ProtectedRoute>
 //           }
 //         />
-//         {/* Optional: Add booking routes if you have them */}
+        
+//         {/* User Booking Routes */}
 //         <Route
 //           path="my-bookings"
 //           element={
@@ -95,6 +100,18 @@
 //         <Route path="*" element={<NotFound />} />
 //       </Route>
 
+//       {/* Vendor Dashboard Route */}
+//       <Route
+//         path="/vendor/dashboard"
+//         element={
+//           <ProtectedRoute>
+//             <VendorProtectedRoute>
+//               <VendorDashboard />
+//             </VendorProtectedRoute>
+//           </ProtectedRoute>
+//         }
+//       />
+
 //       {/* Admin Routes */}
 //       <Route
 //         path="/admin/*"
@@ -114,6 +131,7 @@
 //         <Route path="settings" element={<AdminSettings />} />
 //       </Route>
      
+//       {/* Debug Route */}
 //       <Route path="/debug-auth" element={<DebugAuth />} />
 
 //     </Routes>
@@ -127,7 +145,7 @@
 //     </AuthProvider>
 //   );
 // }
-// src/App.jsx - COMPLETE VERSION WITH VENDOR ROUTES
+// src/App.jsx - COMPLETE VERSION WITH ALL VENDOR ROUTES
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
@@ -144,8 +162,14 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ApplyForVendor from "./pages/vendor/ApplyVendor.jsx";
 
 // Vendor Components
-import VendorDashboard from "./components/Vendor/VendorDashboard.jsx";
 import VendorProtectedRoute from "./components/Vendor/VendorProtectedRoute.jsx";
+import VendorDashboard from "./components/Vendor/VendorDashboard.jsx";
+import VendorCards from "./components/Vendor/VendorCards.jsx";
+import VendorApplications from "./components/Vendor/VendorApplications.jsx";
+import VendorCreateCard from "./components/Vendor/VendorCreateCard.jsx";
+import VendorEarnings from "./components/Vendor/VendorEarnings.jsx";
+import VendorProfile from "./components/Vendor/VendorProfile.jsx";
+import VendorBookings from "./components/Vendor/VendorBookings.jsx";
 
 // Admin Components
 import AdminLayout from "./components/admin/AdminLayout.jsx";
@@ -229,17 +253,24 @@ function AppRoutes() {
         <Route path="*" element={<NotFound />} />
       </Route>
 
-      {/* Vendor Dashboard Route */}
+      {/* Vendor Routes */}
       <Route
-        path="/vendor/dashboard"
+        path="/vendor/*"
         element={
           <ProtectedRoute>
-            <VendorProtectedRoute>
-              <VendorDashboard />
-            </VendorProtectedRoute>
+            <VendorProtectedRoute />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<VendorDashboard />} />
+        <Route path="dashboard" element={<VendorDashboard />} />
+        <Route path="cards" element={<VendorCards />} />
+        <Route path="applications" element={<VendorApplications />} />
+        <Route path="create-card" element={<VendorCreateCard />} />
+        <Route path="earnings" element={<VendorEarnings />} />
+        <Route path="profile" element={<VendorProfile />} />
+        <Route path="bookings" element={<VendorBookings />} />
+      </Route>
 
       {/* Admin Routes */}
       <Route
@@ -262,7 +293,6 @@ function AppRoutes() {
      
       {/* Debug Route */}
       <Route path="/debug-auth" element={<DebugAuth />} />
-
     </Routes>
   );
 }

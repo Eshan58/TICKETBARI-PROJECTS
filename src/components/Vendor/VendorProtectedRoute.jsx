@@ -1,9 +1,9 @@
-// src/components/Vendor/VendorProtectedRoute.jsx
+// src/components/Vendor/VendorProtectedRoute.jsx - FIXED
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 
-export default function VendorProtectedRoute({ children }) {
+export default function VendorProtectedRoute() {
   const { user, isVendor, isAdmin, loading } = useAuth();
 
   if (loading) {
@@ -22,5 +22,5 @@ export default function VendorProtectedRoute({ children }) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  return <Outlet />;
 }

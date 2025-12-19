@@ -29,12 +29,15 @@ export default function Navbar() {
   // Close profile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isProfileMenuOpen && !event.target.closest('.profile-menu-container')) {
+      if (
+        isProfileMenuOpen &&
+        !event.target.closest(".profile-menu-container")
+      ) {
         setIsProfileMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isProfileMenuOpen]);
 
   const handleLogout = async () => {
@@ -54,14 +57,16 @@ export default function Navbar() {
   ];
 
   // Add vendor application link for non-vendor users
-  const vendorNavItem = user?.role !== "vendor" && user?.role !== "admin"
-    ? { path: "/apply-vendor", label: "Become a Vendor", icon: "🏪" }
-    : null;
+  const vendorNavItem =
+    user?.role !== "vendor" && user?.role !== "admin"
+      ? { path: "/apply-vendor", label: "Become a Vendor", icon: "🏪" }
+      : null;
 
   // Add admin link for admin users
-  const adminNavItem = user?.role === "admin"
-    ? { path: "/admin", label: "Admin Panel", icon: "👑" }
-    : null;
+  const adminNavItem =
+    user?.role === "admin"
+      ? { path: "/admin", label: "Admin Panel", icon: "👑" }
+      : null;
 
   // Combine all navigation items
   const navItems = [
@@ -107,29 +112,45 @@ export default function Navbar() {
   // Get user photo
   const getUserPhoto = () => {
     if (!user) return null;
-    
+
     if (user.photoURL) return user.photoURL;
     if (user.photo) return user.photo;
-    
+
     const name = getUserDisplayName();
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff&bold=true`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name
+    )}&background=4f46e5&color=fff&bold=true`;
   };
 
   // Role badge component
   const UserRoleBadge = () => {
     if (!user?.role) return null;
-    
+
     const roleConfig = {
-      admin: { color: "bg-red-100 text-red-700 border-red-200", label: "Admin", icon: "👑" },
-      vendor: { color: "bg-emerald-100 text-emerald-700 border-emerald-200", label: "Vendor", icon: "🏪" },
-      user: { color: "bg-blue-100 text-blue-700 border-blue-200", label: "User", icon: "👤" },
+      admin: {
+        color: "bg-red-100 text-red-700 border-red-200",
+        label: "Admin",
+        icon: "👑",
+      },
+      vendor: {
+        color: "bg-emerald-100 text-emerald-700 border-emerald-200",
+        label: "Vendor",
+        icon: "🏪",
+      },
+      user: {
+        color: "bg-blue-100 text-blue-700 border-blue-200",
+        label: "User",
+        icon: "👤",
+      },
     };
-    
+
     const config = roleConfig[user.role];
     if (!config) return null;
-    
+
     return (
-      <span className={`px-2.5 py-1 text-xs rounded-full ${config.color} border flex items-center gap-1.5`}>
+      <span
+        className={`px-2.5 py-1 text-xs rounded-full ${config.color} border flex items-center gap-1.5`}
+      >
         <span className="text-sm">{config.icon}</span>
         <span className="font-medium">{config.label}</span>
       </span>
@@ -138,12 +159,25 @@ export default function Navbar() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "shadow-md" : ""}`}>
-        <div className={`${isScrolled ? "bg-white/95 backdrop-blur-md border-b border-gray-100" : "bg-white border-b border-gray-100"} transition-all duration-300`}>
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled ? "shadow-md" : ""
+        }`}
+      >
+        <div
+          className={`${
+            isScrolled
+              ? "bg-white/95 backdrop-blur-md border-b border-gray-100"
+              : "bg-white border-b border-gray-100"
+          } transition-all duration-300`}
+        >
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <Link to="/" className="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.02]">
+              <Link
+                to="/"
+                className="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.02]"
+              >
                 <div className="relative">
                   <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow transition-all duration-300">
                     <span className="text-xl">🚍</span>
@@ -211,7 +245,7 @@ export default function Navbar() {
                         {getUserEmail()}
                       </span>
                     </div>
-                    
+
                     {/* Profile dropdown toggle */}
                     <div className="relative">
                       <button
@@ -225,7 +259,9 @@ export default function Navbar() {
                             className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110"
                             onError={(e) => {
                               const name = getUserDisplayName();
-                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                name
+                              )}&background=4f46e5&color=fff`;
                             }}
                           />
                         </div>
@@ -244,7 +280,9 @@ export default function Navbar() {
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
                                     const name = getUserDisplayName();
-                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
+                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                      name
+                                    )}&background=4f46e5&color=fff`;
                                   }}
                                 />
                               </div>
@@ -252,7 +290,9 @@ export default function Navbar() {
                                 <p className="font-semibold text-gray-800 truncate">
                                   {getUserDisplayName()}
                                 </p>
-                                <p className="text-sm text-gray-500 truncate">{getUserEmail()}</p>
+                                <p className="text-sm text-gray-500 truncate">
+                                  {getUserEmail()}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -268,14 +308,14 @@ export default function Navbar() {
                               <span>Dashboard</span>
                             </Link>
 
-                            <Link
+                            {/* <Link
                               to="/user/profile"
                               className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-indigo-600 transition-colors"
                               onClick={() => setIsProfileMenuOpen(false)}
                             >
                               <span className="text-lg">👤</span>
                               <span>My Profile</span>
-                            </Link>
+                            </Link> */}
 
                             <Link
                               to="/my-bookings"
@@ -298,15 +338,17 @@ export default function Navbar() {
                               </Link>
                             )} */}
                             {user?.role === "vendor" && (
-  <Link
-    to="/vendor/dashboard"
-    className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-    onClick={() => setIsProfileMenuOpen(false)}
-  >
-    <span className="text-xl">🏪</span>
-    <span className="font-medium">Vendor Dashboard</span>
-  </Link>
-)}
+                              <Link
+                                to="/vendor/dashboard"
+                                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                onClick={() => setIsProfileMenuOpen(false)}
+                              >
+                                <span className="text-xl">🏪</span>
+                                <span className="font-medium">
+                                  Vendor Dashboard
+                                </span>
+                              </Link>
+                            )}
 
                             {/* Admin specific links */}
                             {user.role === "admin" && (
@@ -369,12 +411,32 @@ export default function Navbar() {
                 className="md:hidden p-2.5 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
               >
                 {isMobileMenuOpen ? (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 )}
               </button>
@@ -384,7 +446,9 @@ export default function Navbar() {
           {/* Mobile Menu */}
           <div
             className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-              isMobileMenuOpen ? "max-h-screen opacity-100 border-t border-gray-100" : "max-h-0 opacity-0"
+              isMobileMenuOpen
+                ? "max-h-screen opacity-100 border-t border-gray-100"
+                : "max-h-0 opacity-0"
             }`}
           >
             <div className="container mx-auto px-4 py-4 bg-white">
@@ -434,7 +498,9 @@ export default function Navbar() {
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               const name = getUserDisplayName();
-                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4f46e5&color=fff`;
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                name
+                              )}&background=4f46e5&color=fff`;
                             }}
                           />
                         </div>
