@@ -1,10 +1,9 @@
-// src/components/Vendor/VendorApplications.jsx - UPDATED
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
 export default function VendorApplications() {
   const [applications, setApplications] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, pending, approved, rejected
+  const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

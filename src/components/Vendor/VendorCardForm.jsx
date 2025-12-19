@@ -1,4 +1,3 @@
-// src/components/Vendor/VendorCardForm.jsx - UPDATED
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';

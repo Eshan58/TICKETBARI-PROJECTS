@@ -1,4 +1,3 @@
-// src/components/AuthTester.jsx
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext.jsx';
 

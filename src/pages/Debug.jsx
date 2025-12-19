@@ -1,4 +1,3 @@
-// src/pages/Debug.jsx
 import React, { useState } from 'react';
 
 export default function DebugPage() {

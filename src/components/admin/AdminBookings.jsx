@@ -1,4 +1,3 @@
-// components/admin/AdminBookings.jsx
 import React, { useState, useEffect } from "react";
 import { getAdminBookings, updateBookingStatus } from "../../services/api";
 import { TbCurrencyTaka } from "react-icons/tb";

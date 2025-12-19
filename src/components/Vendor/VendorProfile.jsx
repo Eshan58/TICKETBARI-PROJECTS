@@ -1,4 +1,3 @@
-// src/components/Vendor/VendorProfile.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';

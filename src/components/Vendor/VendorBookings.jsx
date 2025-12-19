@@ -1,4 +1,3 @@
-// src/components/Vendor/VendorBookings.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -7,7 +6,7 @@ export default function VendorBookings() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, confirmed, cancelled, completed
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchBookings();

@@ -151,8 +151,10 @@ export const getMyBookings = () => apiGet("/api/user/bookings"); // Changed from
 export const getBookingById = (id) => apiGet(`/api/user/bookings/${id}`); // Added this line
 export const createBooking = (data) => apiPost("/api/bookings", data);
 export const cancelBooking = (id) => apiDelete(`/api/bookings/${id}`);
-export const processPayment = (bookingId, data) => apiPost(`/api/bookings/${bookingId}/pay`, data);
-export const downloadTicket = (bookingId) => apiGet(`/api/bookings/${bookingId}/download`, {}, { responseType: 'blob' });
+export const processPayment = (bookingId, data) =>
+  apiPost(`/api/bookings/${bookingId}/pay`, data);
+export const downloadTicket = (bookingId) =>
+  apiGet(`/api/bookings/${bookingId}/download`, {}, { responseType: "blob" });
 
 // ========== VENDOR ENDPOINTS ==========
 export const submitVendorApplication = (data) =>
@@ -167,36 +169,19 @@ export const updateVendorTicket = (id, data) =>
 export const deleteVendorTicket = (id) =>
   apiDelete(`/api/vendor/tickets/${id}`);
 
-
-
-// // Vendor Dashboard Endpoints
-// export const getVendorDashboardStats = () => apiGet("/api/vendor/dashboard/stats");
-// export const getVendorCards = () => apiGet("/api/vendor/cards");
-// export const createVendorCard = (data) => apiPost("/api/vendor/cards", data);
-// export const updateVendorCard = (id, data) => apiPut(`/api/vendor/cards/${id}`, data);
-// export const deleteVendorCard = (id) => apiDelete(`/api/vendor/cards/${id}`);
-// // export const getVendorApplications = (filter = {}) => apiGet("/api/vendor/applications", filter);
-// export const approveVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/approve`);
-// export const rejectVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/reject`)
-
-
-
-
 // Vendor Dashboard Endpoints
-export const getVendorDashboardStats = () => apiGet("/api/vendor/dashboard/stats");
+export const getVendorDashboardStats = () =>
+  apiGet("/api/vendor/dashboard/stats");
 export const getVendorCards = () => apiGet("/api/vendor/cards");
 export const createVendorCard = (data) => apiPost("/api/vendor/cards", data);
-export const updateVendorCard = (id, data) => apiPut(`/api/vendor/cards/${id}`, data);
+export const updateVendorCard = (id, data) =>
+  apiPut(`/api/vendor/cards/${id}`, data);
 export const deleteVendorCard = (id) => apiDelete(`/api/vendor/cards/${id}`);
 // export const getVendorApplications = (filter = {}) => apiGet("/api/vendor/applications", filter);
-export const approveVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/approve`);
-export const rejectVendorApplication = (id) => apiPut(`/api/vendor/applications/${id}/reject`);
-
-
-
-
-
-
+export const approveVendorApplication = (id) =>
+  apiPut(`/api/vendor/applications/${id}/approve`);
+export const rejectVendorApplication = (id) =>
+  apiPut(`/api/vendor/applications/${id}/reject`);
 
 // ========== ADMIN ENDPOINTS ==========
 export const getAdminDashboard = () => apiGet("/api/admin/dashboard");
@@ -243,9 +228,11 @@ export const forceSyncUser = (email) =>
 
 // ========== PAYMENT ENDPOINTS ========== // Added this section
 export const createPayment = (data) => apiPost("/api/payments", data);
-export const verifyPayment = (paymentId, data) => apiPost(`/api/payments/${paymentId}/verify`, data);
+export const verifyPayment = (paymentId, data) =>
+  apiPost(`/api/payments/${paymentId}/verify`, data);
 export const getPaymentMethods = () => apiGet("/api/payment-methods");
-export const getPaymentStatus = (paymentId) => apiGet(`/api/payments/${paymentId}/status`);
+export const getPaymentStatus = (paymentId) =>
+  apiGet(`/api/payments/${paymentId}/status`);
 
 // ========== TEST & UTILITY FUNCTIONS ==========
 export const testBackendConnection = async () => {
@@ -471,7 +458,7 @@ export const getMockBookings = () => {
               ticketTitle: "Flight to Chittagong",
               createdAt: "2025-12-14T21:29:00Z",
               quantity: 1,
-              totalPrice: 4500.00,
+              totalPrice: 4500.0,
               status: "paid",
               paymentMethod: "bkash",
               paidAt: "2025-12-14T21:35:00Z",
@@ -480,8 +467,8 @@ export const getMockBookings = () => {
                 from: "Dhaka",
                 to: "Chittagong",
                 airline: "Bangladesh Airlines",
-                flightNo: "BG-203"
-              }
+                flightNo: "BG-203",
+              },
             },
             {
               _id: "2",
@@ -489,7 +476,7 @@ export const getMockBookings = () => {
               ticketTitle: "Business Flight to Chittagong",
               createdAt: "2025-12-14T21:29:00Z",
               quantity: 1,
-              totalPrice: 9500.00,
+              totalPrice: 9500.0,
               status: "paid",
               paymentMethod: "nagad",
               paidAt: "2025-12-14T21:40:00Z",
@@ -498,8 +485,8 @@ export const getMockBookings = () => {
                 from: "Dhaka",
                 to: "Chittagong",
                 airline: "Premium Airways",
-                flightNo: "PA-501"
-              }
+                flightNo: "PA-501",
+              },
             },
             {
               _id: "3",
@@ -507,7 +494,7 @@ export const getMockBookings = () => {
               ticketTitle: "Business Flight to Chittagong",
               createdAt: "2025-12-14T21:28:00Z",
               quantity: 1,
-              totalPrice: 9500.00,
+              totalPrice: 9500.0,
               status: "confirmed",
               paymentMethod: null,
               ticketId: {
@@ -515,11 +502,11 @@ export const getMockBookings = () => {
                 from: "Dhaka",
                 to: "Chittagong",
                 airline: "Premium Airways",
-                flightNo: "PA-502"
-              }
-            }
-          ]
-        }
+                flightNo: "PA-502",
+              },
+            },
+          ],
+        },
       });
     }, 500);
   });
@@ -537,14 +524,14 @@ export const getMockBookingById = (id) => {
             ticketTitle: "Flight to Chittagong",
             createdAt: "2025-12-14T21:29:00Z",
             quantity: 2,
-            totalPrice: 9000.00,
+            totalPrice: 9000.0,
             status: "paid",
             paymentMethod: "bkash",
             transactionId: "TRX123456789",
             paidAt: "2025-12-14T21:35:00Z",
             passengers: [
               { name: "Eshan Islam", seat: "12A", passport: "AB1234567" },
-              { name: "Sarah Khan", seat: "12B", passport: "CD7890123" }
+              { name: "Sarah Khan", seat: "12B", passport: "CD7890123" },
             ],
             ticketId: {
               departureAt: "2025-12-15T08:00:00Z",
@@ -559,10 +546,10 @@ export const getMockBookingById = (id) => {
               checkInCounter: "Counter 5-8",
               baggageAllowance: "20kg",
               cabinClass: "Economy",
-              duration: "1h 30m"
-            }
-          }
-        }
+              duration: "1h 30m",
+            },
+          },
+        },
       });
     }, 500);
   });

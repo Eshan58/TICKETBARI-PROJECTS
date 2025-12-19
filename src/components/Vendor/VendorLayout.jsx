@@ -1,4 +1,3 @@
-// src/components/Vendor/VendorLayout.jsx
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';

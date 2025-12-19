@@ -29,13 +29,6 @@ const AdminDashboard = () => {
         setStats(dashboardRes.data.data);
       }
 
-      // Fetch recent activity (you'll need to create this endpoint)
-      // const activityRes = await api.apiGet("/api/admin/recent-activity");
-      // if (activityRes.data.success) {
-      //   setRecentActivity(activityRes.data.data.activity);
-      // }
-
-      // Mock recent activity for now
       setRecentActivity([
         { id: 1, type: "user", action: "registered", name: "John Doe", time: "2 min ago" },
         { id: 2, type: "ticket", action: "created", name: "Dhaka to Chittagong", time: "15 min ago" },
