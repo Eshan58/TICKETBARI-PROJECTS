@@ -8,17 +8,17 @@ export default function AuthTester() {
   const testLogin = async (email, password) => {
     clearError();
     console.clear();
-    console.log('🧪 Testing login with:', email);
+    // console.log('🧪 Testing login with:', email);
     
     try {
       const user = await login(email, password);
-      console.log('✅ Login successful:', user);
+      // console.log('✅ Login successful:', user);
       setTestResult({
         type: 'success',
         message: `Login successful! Welcome ${user.name} (${user.role})`
       });
     } catch (error) {
-      console.log('❌ Login failed:', error.message);
+      // console.log('❌ Login failed:', error.message);
       setTestResult({
         type: 'error',
         message: error.message
@@ -26,12 +26,12 @@ export default function AuthTester() {
     }
     
     const debug = debugAuth();
-    console.log('🔍 Auth debug info:', debug);
+    // console.log('🔍 Auth debug info:', debug);
   };
   
   const quickTest = () => {
     const debug = debugAuth();
-    console.log('Quick debug:', debug);
+    // console.log('Quick debug:', debug);
     setTestResult({
       type: 'info',
       message: 'Check console for debug info'

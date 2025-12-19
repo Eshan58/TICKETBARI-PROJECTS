@@ -1,14 +1,14 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://ticketbari-project-backend.vercel.app";
 
 // Get token from localStorage
 export function getToken() {
   const token = localStorage.getItem("firebaseToken");
-  console.log("🔑 getToken called, token exists:", !!token);
+  // console.log("🔑 getToken called, token exists:", !!token);
   if (token) {
-    console.log("📏 Token length:", token.length);
-    console.log("🔍 First 50 chars:", token.substring(0, 50));
+    // console.log("📏 Token length:", token.length);
+    // console.log("🔍 First 50 chars:", token.substring(0, 50));
   }
   return token;
 }
@@ -29,13 +29,13 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
-    console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`);
+    // console.log(`📡 ${config.method?.toUpperCase()} ${config.url}`);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("✅ Token added to headers");
+      // console.log("✅ Token added to headers");
     } else {
-      console.log("⚠️ No token available for request");
+      // console.log("⚠️ No token available for request");
     }
 
     return config;
@@ -95,7 +95,7 @@ export const apiRequest = async (
   params = {}
 ) => {
   try {
-    console.log(`📤 API Request: ${method} ${endpoint}`);
+    // console.log(`📤 API Request: ${method} ${endpoint}`);
     const response = await apiClient({
       url: endpoint,
       method: method.toUpperCase(),
@@ -237,7 +237,7 @@ export const getPaymentStatus = (paymentId) =>
 // ========== TEST & UTILITY FUNCTIONS ==========
 export const testBackendConnection = async () => {
   try {
-    console.log("🔍 Testing backend connection...");
+    // console.log("🔍 Testing backend connection...");
     const response = await fetch(`${API_BASE}/api/health`);
     const data = await response.json();
     return {
@@ -258,7 +258,7 @@ export const testBackendConnection = async () => {
 // Test user authentication flow
 export const testAuthFlow = async () => {
   try {
-    console.log("🧪 Testing authentication flow...");
+    // console.log("🧪 Testing authentication flow...");
 
     const results = {
       backendStatus: null,
@@ -271,10 +271,10 @@ export const testAuthFlow = async () => {
     try {
       const backendRes = await testBackendConnection();
       results.backendStatus = backendRes;
-      console.log(
-        "✅ Backend connection:",
-        backendRes.success ? "OK" : "FAILED"
-      );
+      // console.log(
+      //   "✅ Backend connection:",
+      //   backendRes.success ? "OK" : "FAILED"
+      // );
     } catch (error) {
       results.backendStatus = { success: false, error: error.message };
     }
@@ -285,10 +285,10 @@ export const testAuthFlow = async () => {
       hasToken: !!token,
       tokenLength: token?.length || 0,
     };
-    console.log(
-      "✅ Token status:",
-      results.tokenStatus.hasToken ? "Present" : "Missing"
-    );
+    // console.log(
+    //   "✅ Token status:",
+    //   results.tokenStatus.hasToken ? "Present" : "Missing"
+    // );
 
     // 3. Test profile endpoint
     try {
@@ -298,10 +298,10 @@ export const testAuthFlow = async () => {
         email: profileRes.data.data.user.email,
         role: profileRes.data.user.role,
       };
-      console.log(
-        "✅ Profile access:",
-        `Email: ${results.profileStatus.email}, Role: ${results.profileStatus.role}`
-      );
+      // console.log(
+      //   "✅ Profile access:",
+      //   `Email: ${results.profileStatus.email}, Role: ${results.profileStatus.role}`
+      // );
     } catch (error) {
       results.profileStatus = {
         success: false,
@@ -321,7 +321,7 @@ export const testAuthFlow = async () => {
           success: true,
           data: adminRes.data.data,
         };
-        console.log("✅ Admin access: Granted");
+        // console.log("✅ Admin access: Granted");
       } catch (error) {
         results.adminStatus = {
           success: false,
@@ -347,26 +347,26 @@ export const testAuthFlow = async () => {
 // Force admin mode utility
 export const forceAdminMode = async () => {
   try {
-    console.log("👑 Attempting to force admin mode...");
+    // console.log("👑 Attempting to force admin mode...");
 
     // Step 1: Check current user
     const profile = await getUserProfile();
-    console.log(
-      "Current user:",
-      profile.data.user.email,
-      "Role:",
-      profile.data.user.role
-    );
+    // console.log(
+    //   "Current user:",
+    //   profile.data.user.email,
+    //   "Role:",
+    //   profile.data.user.role
+    // );
 
     // Step 2: Make admin if not already
     if (profile.data.user.role !== "admin") {
-      console.log("⚠️ User is not admin, making admin...");
+      // console.log("⚠️ User is not admin, making admin...");
       const makeAdminRes = await makeMeAdmin();
-      console.log("Make admin result:", makeAdminRes.data.message);
+      // console.log("Make admin result:", makeAdminRes.data.message);
 
       // Step 3: Refresh profile
       const newProfile = await getUserProfile();
-      console.log("New role:", newProfile.data.user.role);
+      // console.log("New role:", newProfile.data.user.role);
 
       return {
         success: true,
@@ -396,7 +396,7 @@ export const forceAdminMode = async () => {
 // Debug user info
 export const debugUserInfo = async () => {
   try {
-    console.log("🔍 Debugging user info...");
+    // console.log("🔍 Debugging user info...");
 
     const results = {};
 
@@ -562,7 +562,7 @@ export const smartGetBookings = async () => {
     const response = await getMyBookings();
     return response;
   } catch (error) {
-    console.log("Real API failed, using mock data");
+    // console.log("Real API failed, using mock data");
     // Fall back to mock data
     return getMockBookings();
   }
@@ -574,13 +574,13 @@ export const smartGetBookingById = async (id) => {
     const response = await getBookingById(id);
     return response;
   } catch (error) {
-    console.log("User endpoint failed, trying admin endpoint...");
+    // console.log("User endpoint failed, trying admin endpoint...");
     try {
       // Try admin endpoint
       const response = await getAdminBookingById(id);
       return response;
     } catch (secondError) {
-      console.log("Both API endpoints failed, using mock data");
+      // console.log("Both API endpoints failed, using mock data");
       // Fall back to mock data
       return getMockBookingById(id);
     }

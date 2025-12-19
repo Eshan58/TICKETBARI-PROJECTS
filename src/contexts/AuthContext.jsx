@@ -25,17 +25,17 @@ export const AuthProvider = ({ children }) => {
   // FIXED: Enhanced sync function that checks MongoDB directly
   const syncUserWithBackend = async (firebaseUser, retryCount = 0) => {
     try {
-      console.log("🔄 Syncing user with backend:", firebaseUser?.email);
+      // console.log("🔄 Syncing user with backend:", firebaseUser?.email);
       
       if (!firebaseUser) {
-        console.log("❌ No Firebase user found for sync");
+        // console.log("❌ No Firebase user found for sync");
         return null;
       }
 
       // Get Firebase token
       const token = await firebaseUser.getIdToken(true);
       
-      console.log("✅ Firebase token obtained:", token ? `Token length: ${token.length}` : "No token");
+      // console.log("✅ Firebase token obtained:", token ? `Token length: ${token.length}` : "No token");
       
       if (!token) {
         console.error("❌ Could not get Firebase token");
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       // Store token in localStorage
       localStorage.setItem("firebaseToken", token);
       
-      console.log("📡 Calling backend profile API...");
+      // console.log("📡 Calling backend profile API...");
       
       try {
         // Try to get user profile from backend
@@ -53,16 +53,16 @@ export const AuthProvider = ({ children }) => {
         
         if (response.data?.success) {
           const userData = response.data.data.user;
-          console.log("✅ Backend user sync successful:", {
-            email: userData.email,
-            role: userData.role,
-            uid: userData.uid
-          });
+          // console.log("✅ Backend user sync successful:", {
+          //   email: userData.email,
+          //   role: userData.role,
+          //   uid: userData.uid
+          // });
           
           setUser(userData);
           return userData;
         } else {
-          console.log("⚠️ Backend response not successful, trying direct DB check...");
+          // console.log("⚠️ Backend response not successful, trying direct DB check...");
           throw new Error("Backend sync failed");
         }
       } catch (apiError) {
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         
         // FIX: Try to get user directly from MongoDB debug endpoint
         try {
-          console.log("🔄 Trying direct MongoDB user lookup...");
+          // console.log("🔄 Trying direct MongoDB user lookup...");
           const debugResponse = await api.getDebugUsers();
           
           if (debugResponse.data?.success) {
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
             const dbUser = users.find(u => u.email === firebaseUser.email);
             
             if (dbUser) {
-              console.log("✅ Found user in MongoDB:", dbUser.email, dbUser.role);
+              // console.log("✅ Found user in MongoDB:", dbUser.email, dbUser.role);
               setUser(dbUser);
               return dbUser;
             }
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         // If everything fails, create fallback user
-        console.log("📝 Creating fallback user from Firebase data");
+        // console.log("📝 Creating fallback user from Firebase data");
         const fallbackUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }) => {
   // NEW: Direct admin override function
   const forceAdminMode = async () => {
     try {
-      console.log("👑 Forcing admin mode...");
+      // console.log("👑 Forcing admin mode...");
       
       // Get all users from debug endpoint
       const response = await api.getDebugUsers();
@@ -142,7 +142,7 @@ export const AuthProvider = ({ children }) => {
         const adminUser = users.find(u => u.email === "mahdiashan9@gmail.com");
         
         if (adminUser) {
-          console.log("✅ Found admin in MongoDB:", adminUser);
+          // console.log("✅ Found admin in MongoDB:", adminUser);
           
           // Update the user in context
           setUser(adminUser);
@@ -168,17 +168,17 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       
-      console.log(`🔐 Attempting login for: ${email}`);
+      // console.log(`🔐 Attempting login for: ${email}`);
       
       const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log("✅ Firebase login successful");
+      // console.log("✅ Firebase login successful");
       
       const user = await syncUserWithBackend(result.user);
-      console.log("✅ Login completed");
+      // console.log("✅ Login completed");
       return user;
     } catch (error) {
       setError(error.message);
-      console.error("❌ Email login error:", error.message);
+      // console.error("❌ Email login error:", error.message);
       throw error;
     } finally {
       setLoading(false);
@@ -190,16 +190,16 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      console.log('🔵 Starting Google sign-in...');
+      // console.log('🔵 Starting Google sign-in...');
       
       const result = await signInWithPopup(auth, provider);
-      console.log('✅ Google sign-in successful:', result.user.email);
+      // console.log('✅ Google sign-in successful:', result.user.email);
       
       const user = await syncUserWithBackend(result.user);
       
       // SPECIAL FIX: If user is mahdiashan9@gmail.com, force admin mode
       if (result.user.email === "mahdiashan9@gmail.com") {
-        console.log("⭐ Detected admin email, forcing admin mode...");
+        // console.log("⭐ Detected admin email, forcing admin mode...");
         await forceAdminMode();
       }
       
@@ -219,10 +219,10 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
       
-      console.log(`📝 Registering new user: ${email}`);
+      // console.log(`📝 Registering new user: ${email}`);
       
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("✅ Firebase registration successful");
+      // console.log("✅ Firebase registration successful");
       
       const user = await syncUserWithBackend(result.user);
       return user;
@@ -238,13 +238,13 @@ export const AuthProvider = ({ children }) => {
   // Logout function
   const logout = async () => {
     try {
-      console.log("👋 Logging out...");
+      // console.log("👋 Logging out...");
       await firebaseSignOut(auth);
       localStorage.removeItem("firebaseToken");
       localStorage.removeItem("adminOverride");
       localStorage.removeItem("user");
       setUser(null);
-      console.log("✅ Logout successful");
+      // console.log("✅ Logout successful");
       window.location.href = "/";
     } catch (error) {
       setError(error.message);
@@ -256,12 +256,12 @@ export const AuthProvider = ({ children }) => {
   // Check authentication status on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      console.log("🔧 Initializing auth...");
+      // console.log("🔧 Initializing auth...");
       
       // Check if we have an admin override
       const adminOverride = localStorage.getItem('adminOverride');
       if (adminOverride === 'true') {
-        console.log("🔄 Admin override detected, loading from localStorage...");
+        // console.log("🔄 Admin override detected, loading from localStorage...");
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           try {
@@ -277,24 +277,24 @@ export const AuthProvider = ({ children }) => {
       
       // Normal Firebase auth flow
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        console.log('👤 Firebase auth state changed:', firebaseUser ? firebaseUser.email : 'No user');
+        // console.log('👤 Firebase auth state changed:', firebaseUser ? firebaseUser.email : 'No user');
         
         if (firebaseUser) {
           await syncUserWithBackend(firebaseUser);
           
           // SPECIAL CHECK: If logged in with mahdiashan9@gmail.com, ensure admin role
           if (firebaseUser.email === "mahdiashan9@gmail.com") {
-            console.log("⭐ Admin email detected, verifying admin status...");
+            // console.log("⭐ Admin email detected, verifying admin status...");
             
             // Check current user role
             const currentUser = user || JSON.parse(localStorage.getItem('user') || '{}');
             if (currentUser.role !== 'admin') {
-              console.log("⚠️ Admin email but not admin role, forcing admin mode...");
+              // console.log("⚠️ Admin email but not admin role, forcing admin mode...");
               await forceAdminMode();
             }
           }
         } else {
-          console.log("👤 No user signed in");
+          // console.log("👤 No user signed in");
           setUser(null);
           localStorage.removeItem("firebaseToken");
         }

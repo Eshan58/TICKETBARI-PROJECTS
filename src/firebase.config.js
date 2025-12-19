@@ -12,20 +12,20 @@ const firebaseConfig = {
 };
 
 // Log config (without sensitive data)
-console.log('Firebase Config:', {
-  hasApiKey: !!firebaseConfig.apiKey,
-  hasAuthDomain: !!firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId
-});
+// console.log('Firebase Config:', {
+//   hasApiKey: !!firebaseConfig.apiKey,
+//   hasAuthDomain: !!firebaseConfig.authDomain,
+//   projectId: firebaseConfig.projectId
+// });
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // For debugging
-console.log('Firebase Auth initialized:', {
-  app: app.name,
-  auth: !!auth
-});
+// console.log('Firebase Auth initialized:', {
+//   app: app.name,
+//   auth: !!auth
+// });
 
 export { auth, app };

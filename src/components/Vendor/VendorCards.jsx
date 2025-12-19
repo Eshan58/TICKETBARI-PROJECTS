@@ -14,7 +14,7 @@ export default function VendorCards() {
   const fetchCards = async () => {
     try {
       const response = await api.getVendorCards();
-      console.log('Cards response:', response);
+      // console.log('Cards response:', response);
       setCards(response.data.data || []);
     } catch (error) {
       console.error('Error fetching cards:', error);

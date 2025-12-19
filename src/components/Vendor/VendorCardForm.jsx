@@ -55,11 +55,11 @@ export default function VendorCardForm() {
         availableSlots: parseInt(formData.availableSlots)
       };
 
-      console.log('Submitting card data:', cardData);
+      // console.log('Submitting card data:', cardData);
       
       // Send to API
       const response = await api.createVendorCard(cardData);
-      console.log('Create card response:', response);
+      // console.log('Create card response:', response);
 
       setSuccess(true);
       

@@ -45,7 +45,7 @@ const ApplyVendor = () => {
     setIsSubmitting(true);
     
     try {
-      console.log("📤 Submitting vendor application...");
+      // console.log("📤 Submitting vendor application...");
       
       const applicationData = {
         businessName: formData.businessName,
@@ -58,11 +58,11 @@ const ApplyVendor = () => {
         taxId: formData.taxId || ""
       };
 
-      console.log("Application data:", applicationData);
+      // console.log("Application data:", applicationData);
 
       const response = await api.submitVendorApplication(applicationData);
       
-      console.log("✅ Application response:", response.data);
+      // console.log("✅ Application response:", response.data);
       
       if (response.data.success) {
         setApplicationId(response.data.data?.application?._id || "pending");
@@ -797,17 +797,17 @@ const ApplyVendor = () => {
               <p>Required minimum: 50 characters</p>
               <button 
                 onClick={() => {
-                  console.log("Form Data:", formData);
-                  console.log("API Object:", {
-                    businessName: formData.businessName,
-                    contactName: formData.contactName,
-                    phone: formData.phone,
-                    businessType: formData.businessType,
-                    description: formData.description,
-                    website: formData.website,
-                    address: formData.address,
-                    taxId: formData.taxId
-                  });
+                  // console.log("Form Data:", formData);
+                  // console.log("API Object:", {
+                  //   businessName: formData.businessName,
+                  //   contactName: formData.contactName,
+                  //   phone: formData.phone,
+                  //   businessType: formData.businessType,
+                  //   description: formData.description,
+                  //   website: formData.website,
+                  //   address: formData.address,
+                  //   taxId: formData.taxId
+                  // });
                 }}
                 style={{
                   marginTop: "10px",

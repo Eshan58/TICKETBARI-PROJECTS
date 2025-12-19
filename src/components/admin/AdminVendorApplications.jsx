@@ -37,13 +37,13 @@ const AdminVendorApplications = () => {
         status: status === "all" ? "" : status,
       });
       
-      console.log("📊 Vendor applications response:", response.data);
+      // console.log("📊 Vendor applications response:", response.data);
       
       if (response.data.success) {
         setApplications(response.data.data.applications || []);
         setStats(response.data.data.stats || stats);
         setPagination(response.data.data.pagination || pagination);
-        console.log(`✅ Loaded ${response.data.data.applications?.length || 0} applications`);
+        // console.log(`✅ Loaded ${response.data.data.applications?.length || 0} applications`);
       } else {
         setError(response.data.message || "Failed to fetch applications");
       }
@@ -52,7 +52,7 @@ const AdminVendorApplications = () => {
       setError(err.response?.data?.message || err.message || "Failed to fetch applications");
       
       // Fallback mock data for testing
-      console.log("🔄 Using fallback data for testing");
+      // console.log("🔄 Using fallback data for testing");
       const mockApplications = [
         {
           _id: "mock-1",
@@ -82,12 +82,12 @@ const AdminVendorApplications = () => {
   };
 
   useEffect(() => {
-    console.log("🔄 Loading vendor applications with filter:", filter);
+    // console.log("🔄 Loading vendor applications with filter:", filter);
     fetchApplications(1, filter);
   }, [filter]);
 
   const handleReview = (application) => {
-    console.log("📝 Reviewing application:", application._id);
+    // console.log("📝 Reviewing application:", application._id);
     setReviewModal({
       open: true,
       application,
@@ -98,7 +98,7 @@ const AdminVendorApplications = () => {
   };
 
   const submitReview = async () => {
-    console.log("🚀 Submitting review:", reviewModal);
+    // console.log("🚀 Submitting review:", reviewModal);
     
     if (!reviewModal.status) {
       alert("Please select a status");
@@ -122,7 +122,7 @@ const AdminVendorApplications = () => {
     }
 
     try {
-      console.log(`📤 Sending review for application: ${reviewModal.application._id}`);
+      // console.log(`📤 Sending review for application: ${reviewModal.application._id}`);
       
       const response = await api.reviewVendorApplication(
         reviewModal.application._id,
@@ -132,7 +132,7 @@ const AdminVendorApplications = () => {
         }
       );
 
-      console.log("✅ Review response:", response.data);
+      // console.log("✅ Review response:", response.data);
 
       if (response.data.success) {
         if (reviewModal.status === "approved") {
@@ -153,7 +153,7 @@ const AdminVendorApplications = () => {
         fetchApplications(pagination.page, filter);
         
         // Show success message with details
-        console.log(`✅ User ${reviewModal.application.userEmail} role updated to vendor`);
+        // console.log(`✅ User ${reviewModal.application.userEmail} role updated to vendor`);
         
       } else {
         alert(response.data.message || "Failed to submit review");
@@ -698,9 +698,9 @@ const AdminVendorApplications = () => {
                 <p>Error: {error || "None"}</p>
                 <button 
                   onClick={() => {
-                    console.log("Applications:", applications);
-                    console.log("Filter:", filter);
-                    console.log("Stats:", stats);
+                    // console.log("Applications:", applications);
+                    // console.log("Filter:", filter);
+                    // console.log("Stats:", stats);
                   }}
                   className="mt-2 px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs"
                 >

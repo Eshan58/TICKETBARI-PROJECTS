@@ -19,12 +19,12 @@ export default function DebugAuth() {
       setResult('🔍 Testing token...\n');
       
       // Test 1: Server health
-      const healthResponse = await fetch('http://localhost:5000/api/health');
+      const healthResponse = await fetch('https://ticketbari-project-backend.vercel.app/api/health');
       const healthData = await healthResponse.json();
       setResult(prev => prev + `✅ Server health: ${JSON.stringify(healthData, null, 2)}\n\n`);
       
       // Test 2: Dashboard endpoint with token
-      const dashResponse = await fetch('http://localhost:5000/api/user/dashboard', {
+      const dashResponse = await fetch('https://ticketbari-project-backend.vercel.app/api/user/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -135,9 +135,9 @@ export default function DebugAuth() {
               <div>
                 <p className="text-gray-400 text-sm">Server Status:</p>
                 <p className="text-sm">
-                  <a href="http://localhost:5000/api/health" target="_blank" rel="noopener noreferrer" 
+                  <a href="https://ticketbari-project-backend.vercel.app/api/health" target="_blank" rel="noopener noreferrer" 
                      className="text-blue-400 hover:text-blue-300">
-                    http://localhost:5000/api/health
+                    https://ticketbari-project-backend.vercel.app/api/health
                   </a>
                 </p>
               </div>
@@ -145,9 +145,9 @@ export default function DebugAuth() {
               <div>
                 <p className="text-gray-400 text-sm">Dashboard Endpoint:</p>
                 <p className="text-sm">
-                  <a href="http://localhost:5000/api/user/dashboard" target="_blank" rel="noopener noreferrer"
+                  <a href="https://ticketbari-project-backend.vercel.app/api/user/dashboard" target="_blank" rel="noopener noreferrer"
                      className="text-blue-400 hover:text-blue-300">
-                    http://localhost:5000/api/user/dashboard
+                    https://ticketbari-project-backend.vercel.app/api/user/dashboard
                   </a>
                 </p>
               </div>

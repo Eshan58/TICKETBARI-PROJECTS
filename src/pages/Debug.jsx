@@ -17,11 +17,11 @@ export default function DebugPage() {
       setResult('🔍 Testing token...');
       
       // Test server health first
-      const healthResponse = await fetch('http://localhost:5000/api/health');
+      const healthResponse = await fetch('https://ticketbari-project-backend.vercel.app/api/health');
       const healthData = await healthResponse.json();
       
       // Test dashboard endpoint
-      const dashResponse = await fetch('http://localhost:5000/api/user/dashboard', {
+      const dashResponse = await fetch('https://ticketbari-project-backend.vercel.app/api/user/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

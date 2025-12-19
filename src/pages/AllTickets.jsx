@@ -20,11 +20,11 @@ export default function AllTickets() {
       const query = `?page=${page}&limit=8&transport=${transport}&sort=${sort}`;
       const endpoint = `/api/tickets${query}`;
       
-      console.log("📡 Fetching tickets from:", endpoint);
+      // console.log("📡 Fetching tickets from:", endpoint);
       
       const response = await apiRequest(endpoint);
       
-      console.log("📊 Full API Response:", response);
+      // console.log("📊 Full API Response:", response);
       
       // FIXED: Handle both response structures
       let ticketsData = [];
@@ -51,8 +51,8 @@ export default function AllTickets() {
         }
       }
       
-      console.log(`✅ Extracted ${ticketsData.length} tickets`);
-      console.log("📊 Pagination data:", paginationData);
+      // console.log(`✅ Extracted ${ticketsData.length} tickets`);
+      // console.log("📊 Pagination data:", paginationData);
       
       // Debug logging
       if (ticketsData.length > 0) {
@@ -78,13 +78,13 @@ export default function AllTickets() {
       setTotalPages(paginationData.pages || 1);
 
       if (ticketsData.length === 0) {
-        console.log("⚠️ No tickets found with current filters");
-        console.log("🔍 Backend status URL: http://localhost:5000/api/debug/tickets");
-        console.log("🔍 Debug endpoint: http://localhost:5000/api/tickets-debug");
+        // console.log("⚠️ No tickets found with current filters");
+        // console.log("🔍 Backend status URL: http://localhost:5000/api/debug/tickets");
+        // console.log("🔍 Debug endpoint: http://localhost:5000/api/tickets-debug");
       }
     } catch (err) {
       console.error("❌ Error fetching tickets:", err);
-      console.log("🔍 Full error object:", err);
+      // console.log("🔍 Full error object:", err);
       
       // Extract error message from various possible locations
       const errorMessage = 
@@ -113,22 +113,22 @@ export default function AllTickets() {
   // Diagnostic check on mount
   useEffect(() => {
     const runDiagnostics = async () => {
-      console.log("🔍 Running initial diagnostics...");
+      // console.log("🔍 Running initial diagnostics...");
       
       try {
         // Test backend connection
-        const healthRes = await fetch("http://localhost:5000/api/health");
+        const healthRes = await fetch("https://ticketbari-project-backend.vercel.app/api/health");
         const healthData = await healthRes.json();
-        console.log("🏥 Backend Health:", healthData);
+        // console.log("🏥 Backend Health:", healthData);
         
         // Test tickets endpoint directly
-        const ticketsRes = await fetch("http://localhost:5000/api/tickets?limit=2");
+        const ticketsRes = await fetch("https://ticketbari-project-backend.vercel.app/api/tickets?limit=2");
         const ticketsData = await ticketsRes.json();
-        console.log("🎫 Direct tickets fetch:", ticketsData);
+        // console.log("🎫 Direct tickets fetch:", ticketsData);
         
       } catch (err) {
         console.error("❌ Diagnostic failed - Backend might not be running:", err.message);
-        console.log("💡 Solution: Start backend with 'npm start' in the server folder");
+        // console.log("💡 Solution: Start backend with 'npm start' in the server folder");
       }
     };
     
@@ -142,32 +142,32 @@ export default function AllTickets() {
 
   const testBackendEndpoints = async () => {
     try {
-      console.log("🧪 Testing backend endpoints...");
+      // console.log("🧪 Testing backend endpoints...");
 
       // Test 1: Check database status
       const debugRes = await fetch(
-        "http://localhost:5000/api/debug/test-filter"
+        "https://ticketbari-project-backend.vercel.app/api/debug/test-filter"
       );
       const debugData = await debugRes.json();
-      console.log("📊 Database status:", debugData);
+      // console.log("📊 Database status:", debugData);
 
       // Test 2: Try debug endpoint
       const ticketsDebugRes = await fetch(
-        "http://localhost:5000/api/tickets-debug"
+        "https://ticketbari-project-backend.vercel.app/api/tickets-debug"
       );
       const ticketsDebugData = await ticketsDebugRes.json();
-      console.log("🔍 Debug tickets:", ticketsDebugData);
+      // console.log("🔍 Debug tickets:", ticketsDebugData);
 
       // Test 3: Try normal endpoint with debug flag
       const ticketsRes = await fetch(
-        "http://localhost:5000/api/tickets?debug=true"
+        "https://ticketbari-project-backend.vercel.app/api/tickets?debug=true"
       );
       const ticketsData = await ticketsRes.json();
-      console.log("🎫 Normal tickets (debug mode):", ticketsData);
+      // console.log("🎫 Normal tickets (debug mode):", ticketsData);
 
       // Test 4: Test through apiRequest
       const apiRes = await apiRequest("/api/tickets?limit=3");
-      console.log("🎫 API Request result:", apiRes);
+      // console.log("🎫 API Request result:", apiRes);
 
       alert(`Test Results:\n
         Total in DB: ${debugData.debug?.totalInDB || 0}\n
@@ -185,8 +185,8 @@ export default function AllTickets() {
   };
 
   const handleDebugRefresh = () => {
-    console.log("🔄 Manual refresh triggered");
-    console.log("📊 Current debug info:", debugInfo);
+    // console.log("🔄 Manual refresh triggered");
+    // console.log("📊 Current debug info:", debugInfo);
     fetchTickets();
   };
 
@@ -200,9 +200,9 @@ export default function AllTickets() {
     }
 
     try {
-      console.log("🔄 Approving all tickets...");
+      // console.log("🔄 Approving all tickets...");
       const response = await fetch(
-        "http://localhost:5000/api/debug/approve-all",
+        "https://ticketbari-project-backend.vercel.app/api/debug/approve-all",
         {
           method: "POST",
           headers: {
@@ -216,7 +216,7 @@ export default function AllTickets() {
       }
 
       const result = await response.json();
-      console.log("✅ Approve result:", result);
+      // console.log("✅ Approve result:", result);
       alert(result.message || "Tickets approved successfully!");
       fetchTickets(); // Refresh the ticket list
     } catch (err) {
@@ -271,7 +271,7 @@ export default function AllTickets() {
           Test Backend
         </button>
         <a
-          href="http://localhost:5000/api/debug/tickets"
+          href="https://ticketbari-project-backend.vercel.app/api/debug/tickets"
           target="_blank"
           rel="noopener noreferrer"
           className="btn bg-gray-600 text-white hover:bg-gray-700 px-4 py-2 rounded inline-block"
@@ -349,7 +349,7 @@ export default function AllTickets() {
           Approve All Tickets
         </button>
         <a
-          href="http://localhost:5000/api/debug/tickets"
+          href="https://ticketbari-project-backend.vercel.app/api/debug/tickets"
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:text-blue-800 underline"
@@ -551,7 +551,7 @@ export default function AllTickets() {
               Quick Test
             </button>
             <button
-              onClick={() => console.log("Debug Info:", debugInfo)}
+              // onClick={() => console.log("Debug Info:", debugInfo)}
               className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 py-1 rounded"
             >
               Console Log

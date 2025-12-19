@@ -14,7 +14,7 @@ export default function VendorApplications() {
     try {
       setLoading(true);
       const response = await api.getVendorApplications({ status: filter === 'all' ? undefined : filter });
-      console.log('Applications response:', response);
+      // console.log('Applications response:', response);
       setApplications(response.data.data || []);
     } catch (error) {
       console.error('Error fetching applications:', error);

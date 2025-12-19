@@ -43,14 +43,14 @@ const AdminDashboard = () => {
     setError(null);
     
     try {
-      console.log("🔄 Fetching admin dashboard data...");
+      // console.log("🔄 Fetching admin dashboard data...");
       
       // Fetch main dashboard stats
       const dashboardRes = await api.getAdminDashboard();
       
       if (dashboardRes.data?.success) {
         const data = dashboardRes.data.data;
-        console.log("📊 Dashboard data received:", data);
+        // console.log("📊 Dashboard data received:", data);
         
         // Set stats
         setStats({
@@ -291,7 +291,7 @@ const AdminDashboard = () => {
           setNotifications(prev => [...newNotifications, ...prev].slice(0, 5));
         }
       } catch (err) {
-        console.log("Error checking notifications:", err);
+        // console.log("Error checking notifications:", err);
       }
     }, 60000);
     

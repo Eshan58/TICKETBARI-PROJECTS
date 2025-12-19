@@ -88,11 +88,11 @@ export default function VendorCreateCard() {
         termsConditions: formData.termsConditions || '',
       };
 
-      console.log('Creating card:', cardData);
+    //   console.log('Creating card:', cardData);
 
       // API call
       const response = await api.createVendorCard(cardData);
-      console.log('Card created:', response.data);
+    //   console.log('Card created:', response.data);
 
       setSuccess(true);
       

@@ -30,12 +30,12 @@ export default function TicketDetails() {
     try {
       setLoading(true);
       setMessage("");
-      console.log(`📡 Fetching ticket details for ID: ${id}`);
+      // console.log(`📡 Fetching ticket details for ID: ${id}`);
 
       // FIXED: Use apiRequest instead of direct axios
       const response = await apiRequest(`/api/tickets/${id}`);
 
-      console.log("✅ Ticket API Response:", response);
+      // console.log("✅ Ticket API Response:", response);
 
       // FIXED: Handle different response structures
       const ticketData = response?.data?.data?.ticket || response?.data?.ticket;
@@ -88,11 +88,11 @@ export default function TicketDetails() {
     }
 
     try {
-      console.log("📦 Booking request:", {
-        ticketId: ticket._id,
-        quantity: qty,
-        userId: user.uid || user._id,
-      });
+      // console.log("📦 Booking request:", {
+      //   ticketId: ticket._id,
+      //   quantity: qty,
+      //   userId: user.uid || user._id,
+      // });
 
       // FIXED: Use apiRequest for booking
       const response = await apiRequest("/api/bookings", "POST", {
@@ -101,7 +101,7 @@ export default function TicketDetails() {
         userId: user.uid || user._id,
       });
 
-      console.log("✅ Booking response:", response);
+      // console.log("✅ Booking response:", response);
 
       if (response.data.success) {
         setMessage(

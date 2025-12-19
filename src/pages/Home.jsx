@@ -21,24 +21,24 @@ export default function Home() {
         setLoading(true);
         setError(null);
         
-        console.log("🔍 Fetching home page data...");
+        // console.log("🔍 Fetching home page data...");
         
         // 1. Check backend health
         try {
           const healthResponse = await api.getHealthStatus();
-          console.log("✅ Backend health:", healthResponse.data);
+          // console.log("✅ Backend health:", healthResponse.data);
           setBackendStatus("connected");
           
           // Check if database is connected
           if (healthResponse.data.services.database === "connected") {
-            console.log("✅ Database is connected");
+            // console.log("✅ Database is connected");
           } else {
-            console.log("⚠️ Database is not connected, using fallback data");
+            // console.log("⚠️ Database is not connected, using fallback data");
           }
         } catch (healthError) {
-          console.log("⚠️ Backend health check failed, trying root endpoint...");
+          // console.log("⚠️ Backend health check failed, trying root endpoint...");
           try {
-            const rootResponse = await fetch("http://localhost:5000/");
+            const rootResponse = await fetch("https://ticketbari-project-backend.vercel.app");
             if (rootResponse.ok) {
               setBackendStatus("connected");
             } else {
@@ -51,11 +51,11 @@ export default function Home() {
         
         // 2. Try to fetch advertised tickets from backend
         try {
-          console.log("📡 Fetching advertised tickets...");
+          // console.log("📡 Fetching advertised tickets...");
           const advertisedResponse = await api.getAdvertisedTickets();
           
           if (advertisedResponse.data?.success && advertisedResponse.data.data.tickets.length > 0) {
-            console.log(`✅ Got ${advertisedResponse.data.data.tickets.length} advertised tickets from backend`);
+            // console.log(`✅ Got ${advertisedResponse.data.data.tickets.length} advertised tickets from backend`);
             setAdvertisedTickets(advertisedResponse.data.data.tickets);
             
             // Use advertised tickets or fallback to regular tickets
@@ -66,11 +66,11 @@ export default function Home() {
               await fetchRegularTickets();
             }
           } else {
-            console.log("⚠️ No advertised tickets found, fetching regular tickets...");
+            // console.log("⚠️ No advertised tickets found, fetching regular tickets...");
             await fetchRegularTickets();
           }
         } catch (advertisedError) {
-          console.log("❌ Error fetching advertised tickets:", advertisedError.message);
+          // console.log("❌ Error fetching advertised tickets:", advertisedError.message);
           // Fallback to regular tickets
           await fetchRegularTickets();
         }
@@ -97,10 +97,10 @@ export default function Home() {
               }));
             }
           } catch (usersError) {
-            console.log("Could not fetch user stats:", usersError.message);
+            // console.log("Could not fetch user stats:", usersError.message);
           }
         } catch (statsError) {
-          console.log("Could not fetch stats:", statsError.message);
+          // console.log("Could not fetch stats:", statsError.message);
         }
         
       } catch (error) {
@@ -117,11 +117,11 @@ export default function Home() {
     // Function to fetch regular tickets
     const fetchRegularTickets = async () => {
       try {
-        console.log("📡 Fetching regular tickets...");
+        // console.log("📡 Fetching regular tickets...");
         const ticketsResponse = await api.getAllTickets({ limit: 8 });
         
         if (ticketsResponse.data?.success && ticketsResponse.data.data.tickets.length > 0) {
-          console.log(`✅ Got ${ticketsResponse.data.data.tickets.length} tickets from backend`);
+          // console.log(`✅ Got ${ticketsResponse.data.data.tickets.length} tickets from backend`);
           
           // Filter to only show active, approved tickets
           const activeTickets = ticketsResponse.data.data.tickets
@@ -135,15 +135,15 @@ export default function Home() {
           setTickets(activeTickets);
           
           if (activeTickets.length === 0) {
-            console.log("⚠️ No active tickets found, using sample data");
+            // console.log("⚠️ No active tickets found, using sample data");
             setTickets(getSampleTickets());
           }
         } else {
-          console.log("⚠️ No tickets from API, using sample data");
+          // console.log("⚠️ No tickets from API, using sample data");
           setTickets(getSampleTickets());
         }
       } catch (ticketsError) {
-        console.log("❌ Error fetching regular tickets:", ticketsError.message);
+        // console.log("❌ Error fetching regular tickets:", ticketsError.message);
         setTickets(getSampleTickets());
       }
     };

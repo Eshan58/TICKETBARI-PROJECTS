@@ -13,7 +13,7 @@ const DebugAuth = () => {
     try {
       const response = await api.checkAuthStatus();
       setAuthCheck(response.data);
-      console.log("🔍 Auth Check Result:", response.data);
+      // console.log("🔍 Auth Check Result:", response.data);
     } catch (error) {
       console.error("❌ Auth Check Error:", error);
       setAuthCheck({ error: error.message });
@@ -25,7 +25,7 @@ const DebugAuth = () => {
   const getDebugInfo = async () => {
     const info = await debugAuth();
     setDebugInfo(info);
-    console.log("🔍 Debug Info:", info);
+    // console.log("🔍 Debug Info:", info);
   };
 
   const forceAdmin = async () => {
@@ -33,7 +33,7 @@ const DebugAuth = () => {
     try {
       const response = await api.makeMeAdmin();
       alert(response.data.message);
-      console.log("👑 Admin force result:", response.data);
+      // console.log("👑 Admin force result:", response.data);
     } catch (error) {
       console.error("❌ Force admin error:", error);
       alert("Error: " + error.message);
