@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, Outlet, Navigate } from "react-router-dom";
+import { Link, useLocation, Outlet, Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 
 const AdminLayout = () => {
@@ -96,6 +96,7 @@ const AdminLayout = () => {
                 </svg>
               </button>
               
+              <Link to={`/dashboard`}>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">TB</span>
@@ -105,6 +106,7 @@ const AdminLayout = () => {
                   <p className="text-xs text-gray-500">ADMINISTRATION PANEL</p>
                 </div>
               </div>
+              </Link>
             </div>
 
             <div className="flex items-center space-x-4">

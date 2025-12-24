@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { ThemeProvider } from "./contexts/ThemeContext.jsx"; // Add this import
 import MainLayout from "./layouts/MainLayout.jsx";
 import Home from "./pages/Home.jsx";
 import AllTickets from "./pages/AllTickets.jsx";
@@ -12,6 +13,10 @@ import Payment from "./pages/Payment.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ApplyForVendor from "./pages/vendor/ApplyVendor.jsx";
+
+// User Profile Routes
+import UserProfile from "./pages/UserProfile.jsx";
+import TransactionHistory from "./pages/TransactionHistory.jsx";
 
 // Vendor Components
 import VendorProtectedRoute from "./components/Vendor/VendorProtectedRoute.jsx";
@@ -102,6 +107,52 @@ function AppRoutes() {
           }
         />
 
+        {/* User Profile & Transaction Routes */}
+        <Route
+          path="user/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+        
+        
+        {/* Transaction routes - all variations */}
+        <Route
+          path="transaction-history"
+          element={
+            <ProtectedRoute>
+              <TransactionHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="transactions"
+          element={
+            <ProtectedRoute>
+              <TransactionHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="transaction"
+          element={
+            <ProtectedRoute>
+              <TransactionHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all route MUST be last */}
         <Route path="*" element={<NotFound />} />
       </Route>
 
@@ -154,8 +205,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ThemeProvider> {/* Wrap everything with ThemeProvider */}
+      <AuthProvider>
+        <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+          <AppRoutes />
+        </div>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

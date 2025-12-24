@@ -6,7 +6,7 @@ import api from '../../services/api';
 export default function VendorProfile() {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ export default function VendorProfile() {
     businessType: '',
     address: '',
     city: '',
-    country: '',
+    country: 'Bangladesh',
     bio: '',
     website: '',
     facebook: '',
@@ -27,25 +27,41 @@ export default function VendorProfile() {
     instagram: '',
   });
 
+  const [profilePicture, setProfilePicture] = useState('');
+
   useEffect(() => {
-    if (user) {
+    fetchVendorProfile();
+  }, []);
+
+  const fetchVendorProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await api.smartGetVendorProfile();
+      const vendorData = response.data.data?.user || {};
+      
       setProfileData({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        businessName: user.businessName || '',
-        businessType: user.businessType || '',
-        address: user.address || '',
-        city: user.city || '',
-        country: user.country || '',
-        bio: user.bio || '',
-        website: user.website || '',
-        facebook: user.facebook || '',
-        twitter: user.twitter || '',
-        instagram: user.instagram || '',
+        name: vendorData.name || user?.name || '',
+        email: vendorData.email || user?.email || '',
+        phone: vendorData.phone || user?.phone || '',
+        businessName: vendorData.businessName || user?.businessName || '',
+        businessType: vendorData.businessType || user?.businessType || '',
+        address: vendorData.address || user?.address || '',
+        city: vendorData.city || user?.city || '',
+        country: vendorData.country || user?.country || 'Bangladesh',
+        bio: vendorData.bio || user?.bio || '',
+        website: vendorData.website || user?.website || '',
+        facebook: vendorData.facebook || user?.facebook || '',
+        twitter: vendorData.twitter || user?.twitter || '',
+        instagram: vendorData.instagram || user?.instagram || '',
       });
+      
+      setProfilePicture(vendorData.photo || user?.photo || user?.photoURL || '');
+    } catch (error) {
+      console.error('Error fetching vendor profile:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,6 +69,40 @@ export default function VendorProfile() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      // Upload to imgbb
+      const IMGBB_API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
+      if (!IMGBB_API_KEY) {
+        setError('Image upload API key not configured');
+        return;
+      }
+
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setProfilePicture(data.data.url);
+        setSuccess('Profile picture uploaded successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.error?.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      setError('Failed to upload profile picture');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -67,11 +117,19 @@ export default function VendorProfile() {
         throw new Error('Name and email are required');
       }
 
-      // Update profile
-      const response = await api.updateVendorProfile(profileData);
+      // Update profile with picture
+      const updatedProfile = {
+        ...profileData,
+        photo: profilePicture,
+        role: 'vendor'
+      };
+
+      const response = await api.smartUpdateVendorProfile(updatedProfile);
       
       // Update auth context
-      updateUser(response.data.data);
+      if (response.data.data?.user) {
+        updateUser(response.data.data.user);
+      }
       
       setSuccess('Profile updated successfully!');
       
@@ -87,7 +145,6 @@ export default function VendorProfile() {
   };
 
   const handleChangePassword = () => {
-    // Implement password change modal or redirect
     alert('Password change functionality coming soon!');
   };
 
@@ -97,8 +154,17 @@ export default function VendorProfile() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div>
+        <p className="mt-2 text-gray-600">Loading profile...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <button
           onClick={() => navigate('/vendor/dashboard')}
@@ -110,8 +176,8 @@ export default function VendorProfile() {
           Back to Dashboard
         </button>
         
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Profile Settings</h1>
-        <p className="text-gray-600">Manage your vendor profile and account settings</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Vendor Profile</h1>
+        <p className="text-gray-600">Display profile picture, name, email, role etc.</p>
       </div>
 
       {/* Success Message */}
@@ -154,8 +220,56 @@ export default function VendorProfile() {
 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Personal Information</h2>
-          
+          {/* Profile Header with Picture */}
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white text-4xl font-bold">
+                {profilePicture ? (
+                  <img 
+                    src={profilePicture} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = profileData.name?.charAt(0) || 'V';
+                    }}
+                  />
+                ) : (
+                  profileData.name?.charAt(0) || 'V'
+                )}
+              </div>
+              <label htmlFor="profile-picture" className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <input 
+                  id="profile-picture" 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleProfilePictureChange}
+                />
+              </label>
+            </div>
+
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{profileData.name || 'Vendor Name'}</h2>
+              <p className="text-gray-600 mb-4">{profileData.email || 'vendor@example.com'}</p>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  {user?.role || 'Vendor'}
+                </span>
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                  {user?.verified ? 'Verified' : 'Pending Verification'}
+                </span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                  Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
