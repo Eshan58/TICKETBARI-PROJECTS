@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "../services/api.js";
 import { Link } from "react-router-dom";
@@ -7,6 +8,8 @@ export default function AllTickets() {
   const [tickets, setTickets] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(8); // Default to 8
   const [transport, setTransport] = useState("");
   const [sort, setSort] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,7 +20,8 @@ export default function AllTickets() {
     setLoading(true);
     setError(null);
     try {
-      const query = `?page=${page}&limit=8&transport=${transport}&sort=${sort}`;
+      // Use dynamic itemsPerPage in the query
+      const query = `?page=${page}&limit=${itemsPerPage}&transport=${transport}&sort=${sort}`;
       const endpoint = `/api/tickets${query}`;
       
       // console.log("📡 Fetching tickets from:", endpoint);
@@ -76,6 +80,7 @@ export default function AllTickets() {
 
       setTickets(ticketsData);
       setTotalPages(paginationData.pages || 1);
+      setTotalItems(paginationData.total || 0);
 
       if (ticketsData.length === 0) {
         // console.log("⚠️ No tickets found with current filters");
@@ -108,7 +113,7 @@ export default function AllTickets() {
 
   useEffect(() => {
     fetchTickets();
-  }, [page, transport, sort]);
+  }, [page, transport, sort, itemsPerPage]);
 
   // Diagnostic check on mount
   useEffect(() => {
@@ -138,7 +143,7 @@ export default function AllTickets() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [transport, sort]);
+  }, [transport, sort, itemsPerPage]);
 
   const testBackendEndpoints = async () => {
     try {
@@ -228,6 +233,10 @@ export default function AllTickets() {
   const handleClearFilters = () => {
     setTransport("");
     setSort("");
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
   };
 
   const LoadingSpinner = () => (
@@ -448,6 +457,111 @@ export default function AllTickets() {
     </div>
   );
 
+  // Enhanced Pagination Component
+  const PaginationControls = () => {
+    if (totalPages <= 1) return null;
+
+    // Calculate page numbers to show
+    const getPageNumbers = () => {
+      const delta = 1; // Number of pages to show on each side of current page
+      const range = [];
+      const rangeWithDots = [];
+      let l;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - delta && i <= page + delta)) {
+          range.push(i);
+        }
+      }
+
+      range.forEach((i) => {
+        if (l) {
+          if (i - l === 2) {
+            rangeWithDots.push(l + 1);
+          } else if (i - l !== 1) {
+            rangeWithDots.push("...");
+          }
+        }
+        rangeWithDots.push(i);
+        l = i;
+      });
+
+      return rangeWithDots;
+    };
+
+    return (
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+        <div className="text-sm text-gray-600">
+          Showing {((page - 1) * itemsPerPage) + 1} to {Math.min(page * itemsPerPage, totalItems)} of {totalItems} tickets
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {/* Items per page selector */}
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value={6}>6</option>
+              <option value={8}>8</option>
+              <option value={9}>9</option>
+              <option value={12}>12</option>
+              <option value={16}>16</option>
+            </select>
+            <span className="text-sm text-gray-600">per page</span>
+          </div>
+
+          {/* Previous button */}
+          <button
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            disabled={page === 1}
+            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Previous
+          </button>
+
+          {/* Page numbers */}
+          <div className="flex items-center gap-1">
+            {getPageNumbers().map((pageNum, index) => (
+              pageNum === "..." ? (
+                <span key={`dots-${index}`} className="px-3 py-2 text-gray-400">...</span>
+              ) : (
+                <button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className={`px-3 py-2 border rounded-md transition-colors ${
+                    page === pageNum
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            ))}
+          </div>
+
+          {/* Next button */}
+          <button
+            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-2 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center gap-1"
+          >
+            Next
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorDisplay />;
 
@@ -461,38 +575,6 @@ export default function AllTickets() {
             Browse and book tickets for your journey
           </p>
         </div>
-
-        {/* <div className="flex flex-wrap gap-2">
-          <button
-            onClick={handleDebugRefresh}
-            className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded flex items-center gap-1"
-            title="Refresh tickets"
-          >
-            <span>🔄</span> Refresh
-          </button>
-          <button
-            onClick={testBackendEndpoints}
-            className="text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-2 rounded flex items-center gap-1"
-            title="Test all backend endpoints"
-          >
-            <span>🧪</span> Test Backend
-          </button>
-          <a
-            href="http://localhost:5000/api/debug/tickets"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-2 rounded flex items-center gap-1"
-          >
-            <span>🔍</span> Debug API
-          </a>
-          <button
-            onClick={handleApproveAll}
-            className="text-sm bg-green-100 hover:bg-green-200 text-green-800 px-3 py-2 rounded flex items-center gap-1"
-            title="Approve all tickets (Debug)"
-          >
-            <span>✅</span> Approve All
-          </button>
-        </div> */}
       </div>
 
       {/* Filter Controls */}
@@ -538,25 +620,26 @@ export default function AllTickets() {
             API Status: {tickets.length > 0 ? 'Connected' : 'Connected (No Data)'}
           </span>
           <span>
-            Tickets found: <strong>{tickets.length}</strong>
+            Total tickets: <strong>{totalItems}</strong>
+          </span>
+          <span>
+            Showing: <strong>{tickets.length}</strong> tickets
           </span>
           <span>
             Page: <strong>{page}</strong> of <strong>{totalPages}</strong>
           </span>
-          <div className="ml-auto flex gap-2">
-            <button
-              onClick={testBackendEndpoints}
-              className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-2 py-1 rounded"
+          <span className="flex items-center gap-2">
+            <span className="text-gray-600">Per page:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
-              Quick Test
-            </button>
-            <button
-              // onClick={() => console.log("Debug Info:", debugInfo)}
-              className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 py-1 rounded"
-            >
-              Console Log
-            </button>
-          </div>
+              <option value={6}>6</option>
+              <option value={8}>8</option>
+              <option value={9}>9</option>
+            </select>
+          </span>
         </div>
       </div>
 
@@ -566,8 +649,7 @@ export default function AllTickets() {
       ) : (
         <>
           <div className="mb-4 text-gray-600">
-            Showing {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}{" "}
-            (Page {page} of {totalPages})
+            Showing {((page - 1) * itemsPerPage) + 1} to {Math.min(page * itemsPerPage, totalItems)} of {totalItems} tickets
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -576,30 +658,8 @@ export default function AllTickets() {
             ))}
           </div>
 
-          {/* Pagination controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-8">
-              <button
-                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                disabled={page === 1}
-                className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
-              >
-                Previous
-              </button>
-              <span className="text-gray-700">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setPage((prev) => Math.min(totalPages, prev + 1))
-                }
-                disabled={page === totalPages}
-                className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          )}
+          {/* Enhanced Pagination controls */}
+          <PaginationControls />
         </>
       )}
     </div>

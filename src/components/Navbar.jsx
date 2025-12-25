@@ -55,26 +55,33 @@ export default function Navbar() {
   const baseNavItems = [
     { path: "/", label: "Home", icon: "🏠" },
     { path: "/tickets", label: "Tickets", icon: "🎫" },
-    { path: "/dashboard", label: "Dashboard", icon: "📊" },
   ];
+
+  // Dashboard link based on role
+  const getDashboardLink = () => {
+    if (!user) return null;
+    
+    switch(user.role) {
+      case "admin":
+        return { path: "/admin", label: "Admin Dashboard", icon: "👑" };
+      case "vendor":
+        return { path: "/vendor/dashboard", label: "Vendor Dashboard", icon: "🏪" };
+      default:
+        return { path: "/dashboard", label: "Dashboard", icon: "📊" };
+    }
+  };
 
   // Add vendor application link for non-vendor users
   const vendorNavItem =
-    user?.role !== "vendor" && user?.role !== "admin"
+    user?.role !== "vendor" && user?.role !== "admin" && user
       ? { path: "/apply-vendor", label: "Become a Vendor", icon: "🏪" }
-      : null;
-
-  // Add admin link for admin users
-  const adminNavItem =
-    user?.role === "admin"
-      ? { path: "/admin", label: "Admin Panel", icon: "👑" }
       : null;
 
   // Combine all navigation items
   const navItems = [
     ...baseNavItems,
+    ...(getDashboardLink() ? [getDashboardLink()] : []),
     ...(vendorNavItem ? [vendorNavItem] : []),
-    ...(adminNavItem ? [adminNavItem] : []),
   ];
 
   // Loading skeleton
@@ -157,6 +164,180 @@ export default function Navbar() {
         <span className="font-medium">{config.label}</span>
       </span>
     );
+  };
+
+  // Profile menu items based on user role
+  const getProfileMenuItems = () => {
+    if (!user) return [];
+
+    const commonItems = [
+      {
+        path: "/user/profile",
+        label: "My Profile",
+        icon: "👤",
+        color: "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+      },
+      {
+        path: "/my-bookings",
+        label: "My Bookings",
+        icon: "🎫",
+        color: "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+      },
+      {
+        path: "/transaction-history",
+        label: "Transaction History",
+        icon: "💰",
+        color: "text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+      }
+    ];
+
+    const roleSpecificItems = {
+      admin: [
+        {
+          path: "/admin",
+          label: "Admin Dashboard",
+          icon: "👑",
+          color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+        },
+        {
+          path: "/admin/users",
+          label: "Manage Users",
+          icon: "👥",
+          color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+        },
+        {
+          path: "/admin/vendor-applications",
+          label: "Vendor Applications",
+          icon: "📋",
+          color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+        },
+        {
+          path: "/admin/tickets",
+          label: "Manage Tickets",
+          icon: "🎫",
+          color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+        },
+        {
+          path: "/admin/settings",
+          label: "Admin Settings",
+          icon: "⚙️",
+          color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+        }
+      ],
+      vendor: [
+        {
+          path: "/vendor/dashboard",
+          label: "Vendor Dashboard",
+          icon: "🏪",
+          color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+        },
+        {
+          path: "/vendor/tickets",
+          label: "My Tickets",
+          icon: "🎫",
+          color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+        },
+        {
+          path: "/vendor/create-ticket",
+          label: "Create Ticket",
+          icon: "➕",
+          color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+        },
+        {
+          path: "/vendor/analytics",
+          label: "Analytics",
+          icon: "📈",
+          color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+        },
+        {
+          path: "/vendor/settings",
+          label: "Vendor Settings",
+          icon: "⚙️",
+          color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+        }
+      ],
+      user: [
+        {
+          path: "/dashboard",
+          label: "User Dashboard",
+          icon: "📊",
+          color: "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+        },
+        {
+          path: "/wishlist",
+          label: "Wishlist",
+          icon: "❤️",
+          color: "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+        },
+        {
+          path: "/settings",
+          label: "Settings",
+          icon: "⚙️",
+          color: "text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+        }
+      ]
+    };
+
+    return [
+      ...commonItems,
+      ...(roleSpecificItems[user.role] || [])
+    ];
+  };
+
+  // Get profile sections based on role
+  const getProfileSections = () => {
+    if (!user) return [];
+
+    const sections = [
+      {
+        title: "Account",
+        items: getProfileMenuItems()
+      }
+    ];
+
+    // Add vendor specific section
+    if (user.role === "vendor") {
+      sections.push({
+        title: "Vendor Tools",
+        items: [
+          {
+            path: "/vendor/orders",
+            label: "Manage Orders",
+            icon: "📦",
+            color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+          },
+          {
+            path: "/vendor/earnings",
+            label: "Earnings",
+            icon: "💰",
+            color: "text-gray-700 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400"
+          }
+        ]
+      });
+    }
+
+    // Add admin specific section
+    if (user.role === "admin") {
+      sections.push({
+        title: "Admin Tools",
+        items: [
+          {
+            path: "/admin/reports",
+            label: "Reports",
+            icon: "📊",
+            color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+          },
+          {
+            path: "/admin/logs",
+            label: "Activity Logs",
+            icon: "📝",
+            color: "text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+          }
+        ]
+      });
+    }
+
+    return sections;
   };
 
   return (
@@ -292,7 +473,7 @@ export default function Navbar() {
 
                       {/* Profile Dropdown Menu */}
                       {isProfileMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                        <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50 max-h-[80vh] overflow-y-auto">
                           {/* User info in dropdown */}
                           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                             <div className="flex items-center gap-3">
@@ -316,84 +497,33 @@ export default function Navbar() {
                                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                                   {getUserEmail()}
                                 </p>
+                                <div className="mt-1">
+                                  <UserRoleBadge />
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* Menu Items */}
+                          {/* Dynamic Menu Items based on role */}
                           <div className="py-2">
-                            <Link
-                              to="/dashboard"
-                              className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                              onClick={() => setIsProfileMenuOpen(false)}
-                            >
-                              <span className="text-lg">📊</span>
-                              <span>Dashboard</span>
-                            </Link>
-
-                            <Link
-                              to="/user/profile"
-                              className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                              onClick={() => setIsProfileMenuOpen(false)}
-                            >
-                              <span className="text-lg">👤</span>
-                              <span>My Profile</span>
-                            </Link>
-
-                            <Link
-                              to="/my-bookings"
-                              className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                              onClick={() => setIsProfileMenuOpen(false)}
-                            >
-                              <span className="text-lg">🎫</span>
-                              <span>My Bookings</span>
-                            </Link>
-
-                            <Link
-                              to="/transaction-history"
-                              className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                              onClick={() => setIsProfileMenuOpen(false)}
-                            >
-                              <span className="text-lg">💰</span>
-                              <span>Transaction History</span>
-                            </Link>
-
-                            {/* Vendor specific links */}
-                            {user.role === "vendor" && (
-                              <Link
-                                to="/vendor/dashboard"
-                                className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                                onClick={() => setIsProfileMenuOpen(false)}
-                              >
-                                <span className="text-lg">🏪</span>
-                                <span>Vendor Dashboard</span>
-                              </Link>
-                            )}
-
-                            {/* Admin specific links */}
-                            {user.role === "admin" && (
-                              <>
+                            {getProfileSections().map((section, index) => (
+                              <div key={index} className="mb-2">
                                 <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                  Admin Panel
+                                  {section.title}
                                 </div>
-                                <Link
-                                  to="/admin"
-                                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                  onClick={() => setIsProfileMenuOpen(false)}
-                                >
-                                  <span className="text-lg">👑</span>
-                                  <span>Admin Dashboard</span>
-                                </Link>
-                                <Link
-                                  to="/admin/vendor-applications"
-                                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                                  onClick={() => setIsProfileMenuOpen(false)}
-                                >
-                                  <span className="text-lg">📋</span>
-                                  <span>Vendor Applications</span>
-                                </Link>
-                              </>
-                            )}
+                                {section.items.map((item, itemIndex) => (
+                                  <Link
+                                    key={itemIndex}
+                                    to={item.path}
+                                    className={`flex items-center gap-3 px-4 py-2.5 ${item.color} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`}
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                  >
+                                    <span className="text-lg">{item.icon}</span>
+                                    <span>{item.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            ))}
                           </div>
 
                           {/* Theme Toggle in Dropdown */}
@@ -590,68 +720,24 @@ export default function Navbar() {
 
                       {/* Mobile user menu */}
                       <div className="space-y-1">
-                        <Link
-                          to="/dashboard"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="text-lg">📊</span>
-                          <span>Dashboard</span>
-                        </Link>
-
-                        <Link
-                          to="/user/profile"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="text-lg">👤</span>
-                          <span>My Profile</span>
-                        </Link>
-
-                        <Link
-                          to="/my-bookings"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="text-lg">🎫</span>
-                          <span>My Bookings</span>
-                        </Link>
-
-                        <Link
-                          to="/transaction-history"
-                          className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          <span className="text-lg">💰</span>
-                          <span>Transaction History</span>
-                        </Link>
-
-                        {user.role === "vendor" && (
-                          <Link
-                            to="/vendor/dashboard"
-                            className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            <span className="text-lg">🏪</span>
-                            <span>Vendor Dashboard</span>
-                          </Link>
-                        )}
-
-                        {user.role === "admin" && (
-                          <>
+                        {getProfileSections().map((section, index) => (
+                          <div key={index} className="space-y-1">
                             <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
-                              Admin Panel
+                              {section.title}
                             </div>
-                            <Link
-                              to="/admin"
-                              className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg"
-                              onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                              <span className="text-lg">👑</span>
-                              <span>Admin Dashboard</span>
-                            </Link>
-                          </>
-                        )}
+                            {section.items.map((item, itemIndex) => (
+                              <Link
+                                key={itemIndex}
+                                to={item.path}
+                                className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                <span className="text-lg">{item.icon}</span>
+                                <span>{item.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        ))}
 
                         {/* Theme Toggle in Mobile Menu */}
                         <button
