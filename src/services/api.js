@@ -1301,9 +1301,8 @@
 // export default api;
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "https://ticketbari-project-backend.vercel.app";
-
 // ========== CORE CONSTANTS ==========
+const API_BASE = import.meta.env.VITE_API_BASE || "https://ticketbari-project-backend.vercel.app";
 const THEME_KEY = "theme";
 const TOKEN_KEY = "firebaseToken";
 const USER_KEY = "user";
@@ -1370,18 +1369,18 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor – adds token and custom headers (now allowed by backend CORS)
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Add request tracking
+
+    // Custom headers – these are now explicitly allowed by backend CORS
     config.headers["X-Request-ID"] = Date.now();
     config.headers["X-App-Version"] = "1.0.0";
-    
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -1392,7 +1391,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     // Network errors
     if (error.code === "ERR_NETWORK") {
       console.error("Network Error - Backend might be down");
@@ -1400,11 +1399,11 @@ apiClient.interceptors.response.use(
         console.warn("Local development: Start backend with 'npm start' in backend folder");
       }
     }
-    
+
     // Token expired (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       try {
         // Try to refresh token
         const refreshToken = localStorage.getItem("refreshToken");
@@ -1412,7 +1411,7 @@ apiClient.interceptors.response.use(
           const refreshResponse = await axios.post(`${API_BASE}/api/auth/refresh`, { refreshToken });
           const newToken = refreshResponse.data.data.token;
           setToken(newToken);
-          
+
           // Retry original request
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return apiClient(originalRequest);
@@ -1424,16 +1423,15 @@ apiClient.interceptors.response.use(
         window.location.href = "/login";
       }
     }
-    
+
     // Handle specific errors
     if (error.response?.status === 403) {
       console.error("Access forbidden - Insufficient permissions");
     }
-    
     if (error.response?.status === 429) {
       console.warn("Rate limited - Too many requests");
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -1448,14 +1446,14 @@ export const apiRequest = async (
 ) => {
   const maxRetries = options.retries || 2;
   let lastError;
-  
+
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       if (attempt > 0) {
         console.log(`Retry ${attempt}/${maxRetries} for ${method} ${endpoint}`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
-      
+
       const response = await apiClient({
         url: endpoint,
         method: method.toUpperCase(),
@@ -1463,34 +1461,34 @@ export const apiRequest = async (
         params,
         ...options,
       });
-      
+
       return response;
     } catch (error) {
       lastError = error;
-      
+
       // Don't retry for client errors
       if ([400, 401, 403, 404].includes(error.response?.status)) break;
       if (attempt === maxRetries) break;
     }
   }
-  
+
   throw lastError;
 };
 
 // Helper methods
-export const apiGet = (endpoint, params = {}, options = {}) => 
+export const apiGet = (endpoint, params = {}, options = {}) =>
   apiRequest(endpoint, "GET", null, params, options);
 
-export const apiPost = (endpoint, data = {}, options = {}) => 
+export const apiPost = (endpoint, data = {}, options = {}) =>
   apiRequest(endpoint, "POST", data, {}, options);
 
-export const apiPut = (endpoint, data = {}, options = {}) => 
+export const apiPut = (endpoint, data = {}, options = {}) =>
   apiRequest(endpoint, "PUT", data, {}, options);
 
-export const apiPatch = (endpoint, data = {}, options = {}) => 
+export const apiPatch = (endpoint, data = {}, options = {}) =>
   apiRequest(endpoint, "PATCH", data, {}, options);
 
-export const apiDelete = (endpoint, options = {}) => 
+export const apiDelete = (endpoint, options = {}) =>
   apiRequest(endpoint, "DELETE", null, {}, options);
 
 // ========== PUBLIC ENDPOINTS ==========
@@ -1503,30 +1501,20 @@ export const getPopularDestinations = () => apiGet("/api/destinations/popular");
 export const getTestimonials = () => apiGet("/api/testimonials");
 
 // ========== AUTH ENDPOINTS ==========
-export const loginUser = (email, password) => 
-  apiPost("/api/auth/login", { email, password });
-
-export const registerUser = (data) => 
-  apiPost("/api/auth/register", data);
-
-export const refreshToken = (refreshToken) => 
-  apiPost("/api/auth/refresh", { refreshToken });
-
-export const verifyEmail = (token) => 
-  apiPost("/api/auth/verify-email", { token });
-
-export const forgotPassword = (email) => 
-  apiPost("/api/auth/forgot-password", { email });
-
-export const resetPassword = (token, newPassword) => 
+export const loginUser = (email, password) => apiPost("/api/auth/login", { email, password });
+export const registerUser = (data) => apiPost("/api/auth/register", data);
+export const refreshToken = (refreshToken) => apiPost("/api/auth/refresh", { refreshToken });
+export const verifyEmail = (token) => apiPost("/api/auth/verify-email", { token });
+export const forgotPassword = (email) => apiPost("/api/auth/forgot-password", { email });
+export const resetPassword = (token, newPassword) =>
   apiPost("/api/auth/reset-password", { token, newPassword });
 
 // ========== USER ENDPOINTS ==========
 export const getUserProfile = () => apiGet("/api/user/profile");
 export const updateUserProfile = (data) => apiPut("/api/user/profile", data);
-export const updateUserPhoto = (formData) => 
+export const updateUserPhoto = (formData) =>
   apiPost("/api/user/profile/photo", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
+    headers: { "Content-Type": "multipart/form-data" },
   });
 export const deleteUserPhoto = () => apiDelete("/api/user/profile/photo");
 export const changePassword = (data) => apiPost("/api/user/change-password", data);
@@ -1539,7 +1527,7 @@ export const cancelBooking = (id) => apiDelete(`/api/bookings/${id}`);
 // User Transactions
 export const getUserTransactions = (params = {}) => apiGet("/api/user/transactions", params);
 export const getTransactionById = (id) => apiGet(`/api/user/transactions/${id}`);
-export const exportTransactions = (format = "csv") => 
+export const exportTransactions = (format = "csv") =>
   apiGet(`/api/user/transactions/export/${format}`, {}, { responseType: "blob" });
 export const getTransactionStats = () => apiGet("/api/user/transactions/stats");
 
@@ -1557,8 +1545,10 @@ export const getUnreadNotificationCount = () => apiGet("/api/user/notifications/
 // User Booking Operations
 export const createBooking = (data) => apiPost("/api/bookings", data);
 export const processPayment = (bookingId, data) => apiPost(`/api/bookings/${bookingId}/pay`, data);
-export const downloadTicket = (bookingId) => apiGet(`/api/bookings/${bookingId}/download`, {}, { responseType: "blob" });
-export const requestRefund = (bookingId, reason) => apiPost(`/api/bookings/${bookingId}/refund`, { reason });
+export const downloadTicket = (bookingId) =>
+  apiGet(`/api/bookings/${bookingId}/download`, {}, { responseType: "blob" });
+export const requestRefund = (bookingId, reason) =>
+  apiPost(`/api/bookings/${bookingId}/refund`, { reason });
 
 // ========== VENDOR ENDPOINTS ==========
 export const submitVendorApplication = (data) => apiPost("/api/apply-vendor", data);
@@ -1584,16 +1574,17 @@ export const rejectVendorApplication = (id) => apiPut(`/api/vendor/applications/
 // Vendor Profile
 export const getVendorProfile = () => apiGet("/api/vendor/profile");
 export const updateVendorProfile = (data) => apiPut("/api/vendor/profile", data);
-export const updateVendorLogo = (formData) => 
+export const updateVendorLogo = (formData) =>
   apiPost("/api/vendor/profile/logo", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
+    headers: { "Content-Type": "multipart/form-data" },
   });
 
 // Vendor Bookings Management
 export const getVendorBookings = (params = {}) => apiGet("/api/vendor/bookings", params);
 export const acceptBooking = (id) => apiPut(`/api/vendor/bookings/${id}/accept`);
 export const rejectBooking = (id) => apiPut(`/api/vendor/bookings/${id}/reject`);
-export const updateVendorBookingStatus = (bookingId, status) => apiPut(`/api/vendor/bookings/${bookingId}/status`, { status });
+export const updateVendorBookingStatus = (bookingId, status) =>
+  apiPut(`/api/vendor/bookings/${bookingId}/status`, { status });
 export const getVendorBookingStats = () => apiGet("/api/vendor/bookings/stats");
 
 // Vendor Revenue & Earnings
@@ -1609,7 +1600,8 @@ export const getVendorPerformance = (period = "monthly") => apiGet(`/api/vendor/
 
 // Vendor Reviews
 export const getVendorReviews = () => apiGet("/api/vendor/reviews");
-export const respondToReview = (reviewId, response) => apiPost(`/api/vendor/reviews/${reviewId}/respond`, { response });
+export const respondToReview = (reviewId, response) =>
+  apiPost(`/api/vendor/reviews/${reviewId}/respond`, { response });
 
 // ========== ADMIN ENDPOINTS ==========
 export const getAdminDashboard = () => apiGet("/api/admin/dashboard");
@@ -1621,18 +1613,22 @@ export const suspendUser = (userId) => apiPut(`/api/admin/users/${userId}/suspen
 export const activateUser = (userId) => apiPut(`/api/admin/users/${userId}/activate`);
 export const getAdminVendorApplications = (filter = {}) => apiGet("/api/admin/vendor-applications", filter);
 export const getVendorApplicationById = (id) => apiGet(`/api/admin/vendor-applications/${id}`);
-export const reviewVendorApplication = (id, data) => apiPut(`/api/admin/vendor-applications/${id}/review`, data);
+export const reviewVendorApplication = (id, data) =>
+  apiPut(`/api/admin/vendor-applications/${id}/review`, data);
 
 // Admin Booking Management
 export const getAdminBookings = (filter = {}) => apiGet("/api/admin/bookings", filter);
 export const getAdminBookingById = (id) => apiGet(`/api/admin/bookings/${id}`);
-export const updateBookingStatus = (bookingId, status) => apiPut(`/api/admin/bookings/${bookingId}/status`, { status });
+export const updateBookingStatus = (bookingId, status) =>
+  apiPut(`/api/admin/bookings/${bookingId}/status`, { status });
 export const getBookingDetails = (bookingId) => apiGet(`/api/admin/bookings/${bookingId}`);
-export const refundBooking = (bookingId, amount) => apiPost(`/api/admin/bookings/${bookingId}/refund`, { amount });
+export const refundBooking = (bookingId, amount) =>
+  apiPost(`/api/admin/bookings/${bookingId}/refund`, { amount });
 
 // Admin Reports & Analytics
 export const getAdminReports = (params = {}) => apiGet("/api/admin/reports", params);
-export const generateReport = (type, params = {}) => apiPost(`/api/admin/reports/${type}`, params, { responseType: "blob" });
+export const generateReport = (type, params = {}) =>
+  apiPost(`/api/admin/reports/${type}`, params, { responseType: "blob" });
 
 // Admin Settings
 export const getAdminSettings = () => apiGet("/api/admin/settings");
@@ -1648,10 +1644,23 @@ export const getPaymentStatus = (paymentId) => apiGet(`/api/payments/${paymentId
 export const getPaymentHistory = () => apiGet("/api/payments/history");
 
 // ========== FILE UPLOAD ==========
-export const uploadFile = (formData) => 
+export const uploadFile = (formData) =>
   apiPost("/api/upload", formData, {
-    headers: { "Content-Type": "multipart/form-data" }
+    headers: { "Content-Type": "multipart/form-data" },
   });
+
+// ========== DEBUG & TESTING ENDPOINTS ==========
+export const checkAuthStatus = () => apiGet("/api/debug/auth-check");
+export const testToken = (token) => apiPost("/api/debug/token-check", { token });
+export const makeMeAdmin = () => apiPost("/api/debug/make-me-admin");
+export const getDebugUsers = () => apiGet("/api/debug/users");
+export const getDebugTickets = () => apiGet("/api/debug/tickets");
+export const approveAllTickets = () => apiPost("/api/debug/approve-all");
+export const createSampleTickets = () => apiPost("/api/debug/create-sample-tickets");
+export const testAdminAccess = () => apiGet("/api/debug/test-admin");
+export const forceSyncUser = (email) => apiGet(`/api/debug/force-sync/${email}`);
+export const clearAllData = () => apiDelete("/api/debug/clear-all");
+export const seedDatabase = () => apiPost("/api/debug/seed");
 
 // ========== MOCK DATA FUNCTIONS ==========
 export const getMockBookings = () => {
@@ -1697,8 +1706,8 @@ export const getMockBookings = () => {
                 flightNo: "PA-501",
               },
             },
-          ]
-        }
+          ],
+        },
       });
     }, 500);
   });
@@ -1764,7 +1773,7 @@ export const getMockTransactions = () => {
                 date: "2024-01-15T10:30:00Z",
                 paymentMethod: "bKash",
                 transactionId: "BK123456789",
-                bookingId: "BK7890123"
+                bookingId: "BK7890123",
               },
               {
                 id: "txn_002",
@@ -1775,7 +1784,7 @@ export const getMockTransactions = () => {
                 date: "2024-01-10T14:20:00Z",
                 paymentMethod: "Credit Card",
                 transactionId: "CC987654321",
-                bookingId: "BK7890124"
+                bookingId: "BK7890124",
               },
             ],
             stats: {
@@ -1783,8 +1792,8 @@ export const getMockTransactions = () => {
               totalTransactions: 2,
               completed: 2,
               pending: 0,
-              failed: 0
-            }
+              failed: 0,
+            },
           },
         },
       });
@@ -1807,10 +1816,10 @@ export const getMockUserProfile = () => {
               photo: "",
               createdAt: "2024-01-01T00:00:00Z",
               role: "user",
-              updatedAt: "2024-03-20T10:30:00Z"
-            }
-          }
-        }
+              updatedAt: "2024-03-20T10:30:00Z",
+            },
+          },
+        },
       });
     }, 500);
   });
@@ -1838,10 +1847,10 @@ export const getMockVendorProfile = () => {
               role: "vendor",
               verified: true,
               createdAt: "2024-01-01T00:00:00Z",
-              updatedAt: "2024-03-20T10:30:00Z"
-            }
-          }
-        }
+              updatedAt: "2024-03-20T10:30:00Z",
+            },
+          },
+        },
       });
     }, 500);
   });
@@ -1874,7 +1883,7 @@ export const getMockVendorCards = () => {
                 food: false,
                 tv: true,
                 charging: true,
-                blanket: true
+                blanket: true,
               },
               vendorId: "vendor123",
               vendorName: "Travel Express",
@@ -1882,10 +1891,10 @@ export const getMockVendorCards = () => {
               verified: "approved",
               status: "active",
               createdAt: "2024-01-10T10:30:00Z",
-              updatedAt: "2024-01-15T14:20:00Z"
+              updatedAt: "2024-01-15T14:20:00Z",
             },
-          ]
-        }
+          ],
+        },
       });
     }, 500);
   });
@@ -1904,12 +1913,12 @@ export const getMockVendorBookings = () => {
               customer: {
                 name: "John Doe",
                 email: "john@example.com",
-                phone: "+8801711111111"
+                phone: "+8801711111111",
               },
               ticket: {
                 title: "Dhaka to Chittagong AC Bus",
                 price: 1200,
-                _id: "ticket1"
+                _id: "ticket1",
               },
               seats: 2,
               totalPrice: 2400,
@@ -1917,10 +1926,10 @@ export const getMockVendorBookings = () => {
               paymentMethod: "bkash",
               transactionId: "TRX001",
               createdAt: "2024-01-15T10:30:00Z",
-              departureDate: "2024-02-15T08:00:00Z"
+              departureDate: "2024-02-15T08:00:00Z",
             },
-          ]
-        }
+          ],
+        },
       });
     }, 500);
   });
@@ -1941,22 +1950,22 @@ export const getMockVendorRevenue = () => {
             totalTicketsSold: 45,
             totalTicketsAdded: 28,
             monthlyRevenue: [
-              { month: 'Jan', revenue: 1250 },
-              { month: 'Feb', revenue: 1450 },
-              { month: 'Mar', revenue: 1650 },
+              { month: "Jan", revenue: 1250 },
+              { month: "Feb", revenue: 1450 },
+              { month: "Mar", revenue: 1650 },
             ],
             ticketSalesByType: [
-              { type: 'Bus', count: 25 },
-              { type: 'Train', count: 10 },
-              { type: 'Flight', count: 5 },
+              { type: "Bus", count: 25 },
+              { type: "Train", count: 10 },
+              { type: "Flight", count: 5 },
             ],
             statusDistribution: [
-              { status: 'pending', count: 8 },
-              { status: 'approved', count: 15 },
-              { status: 'rejected', count: 3 },
-            ]
-          }
-        }
+              { status: "pending", count: 8 },
+              { status: "approved", count: 15 },
+              { status: "rejected", count: 3 },
+            ],
+          },
+        },
       });
     }, 500);
   });
@@ -1977,8 +1986,8 @@ export const smartGetUserProfile = async () => {
         data: {
           success: true,
           message: "Using stored profile",
-          data: { user: storedUser }
-        }
+          data: { user: storedUser },
+        },
       };
     }
     return getMockUserProfile();
@@ -2000,8 +2009,8 @@ export const smartUpdateUserProfile = async (data) => {
       data: {
         success: true,
         message: "Profile saved locally",
-        data: { user: updatedUser }
-      }
+        data: { user: updatedUser },
+      },
     };
   }
 };
@@ -2089,10 +2098,10 @@ export const smartUpdateVendorProfile = async (data) => {
               user: {
                 ...data,
                 updatedAt: new Date().toISOString(),
-                role: 'vendor'
-              }
-            }
-          }
+                role: "vendor",
+              },
+            },
+          },
         });
       }, 500);
     });
@@ -2113,12 +2122,12 @@ export const smartCreateVendorCard = async (data) => {
             data: {
               ...data,
               _id: `card_${Date.now()}`,
-              verified: 'pending',
-              status: 'pending',
+              verified: "pending",
+              status: "pending",
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
-          }
+              updatedAt: new Date().toISOString(),
+            },
+          },
         });
       }, 500);
     });
@@ -2128,7 +2137,7 @@ export const smartCreateVendorCard = async (data) => {
 export const smartUpdateBookingStatus = async (bookingId, action) => {
   try {
     let response;
-    if (action === 'accept') {
+    if (action === "accept") {
       response = await acceptBooking(bookingId);
     } else {
       response = await rejectBooking(bookingId);
@@ -2143,28 +2152,15 @@ export const smartUpdateBookingStatus = async (bookingId, action) => {
             message: `Booking ${action}ed successfully (using mock)`,
             data: {
               bookingId,
-              status: action === 'accept' ? 'accepted' : 'rejected',
-              updatedAt: new Date().toISOString()
-            }
-          }
+              status: action === "accept" ? "accepted" : "rejected",
+              updatedAt: new Date().toISOString(),
+            },
+          },
         });
       }, 500);
     });
   }
 };
-
-// ========== DEBUG & TESTING ENDPOINTS ==========
-export const checkAuthStatus = () => apiGet("/api/debug/auth-check");
-export const testToken = (token) => apiPost("/api/debug/token-check", { token });
-export const makeMeAdmin = () => apiPost("/api/debug/make-me-admin");
-export const getDebugUsers = () => apiGet("/api/debug/users");
-export const getDebugTickets = () => apiGet("/api/debug/tickets");
-export const approveAllTickets = () => apiPost("/api/debug/approve-all");
-export const createSampleTickets = () => apiPost("/api/debug/create-sample-tickets");
-export const testAdminAccess = () => apiGet("/api/debug/test-admin");
-export const forceSyncUser = (email) => apiGet(`/api/debug/force-sync/${email}`);
-export const clearAllData = () => apiDelete("/api/debug/clear-all");
-export const seedDatabase = () => apiPost("/api/debug/seed");
 
 // ========== UTILITY FUNCTIONS ==========
 export const testBackendConnection = async () => {
@@ -2176,14 +2172,14 @@ export const testBackendConnection = async () => {
       status: response.status,
       data,
       message: "Backend connected",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     return {
       success: false,
       message: error.message,
       url: API_BASE,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 };
@@ -2198,14 +2194,14 @@ export const healthCheck = async () => {
       frontend: {
         theme: getCurrentTheme(),
         tokenExists: !!getToken(),
-        online: navigator.onLine
-      }
+        online: navigator.onLine,
+      },
     };
   } catch (error) {
     return {
       status: "unhealthy",
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 };
@@ -2220,10 +2216,9 @@ export const testAuthFlow = async () => {
       },
       profileStatus: null,
       adminStatus: null,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    // Test profile
     try {
       const profileRes = await smartGetUserProfile();
       results.profileStatus = {
@@ -2245,7 +2240,7 @@ export const forceAdminMode = async () => {
   try {
     const profile = await getUserProfile();
 
-    if (profile.data.user.role !== 'admin') {
+    if (profile.data.user.role !== "admin") {
       const makeAdminRes = await makeMeAdmin();
       const newProfile = await getUserProfile();
 
@@ -2277,14 +2272,12 @@ export const debugUserInfo = async () => {
   try {
     const results = {};
 
-    // 1. Local storage info
     results.localStorage = {
       hasToken: !!localStorage.getItem("firebaseToken"),
       hasUser: !!localStorage.getItem("user"),
       tokenLength: localStorage.getItem("firebaseToken")?.length || 0,
     };
 
-    // 2. Backend users list
     try {
       const usersRes = await getDebugUsers();
       results.allUsers = usersRes.data.data.users;
@@ -2296,7 +2289,6 @@ export const debugUserInfo = async () => {
       results.allUsersError = error.message;
     }
 
-    // 3. Current auth status
     try {
       const authRes = await checkAuthStatus();
       results.authStatus = authRes.data.data;
@@ -2304,7 +2296,6 @@ export const debugUserInfo = async () => {
       results.authStatusError = error.message;
     }
 
-    // 4. Current profile
     try {
       const profileRes = await getUserProfile();
       results.currentProfile = profileRes.data.user;
@@ -2327,28 +2318,28 @@ const api = {
   put: apiPut,
   patch: apiPatch,
   delete: apiDelete,
-  
+
   // Theme management
   getCurrentTheme,
   setTheme,
   toggleTheme,
-  
+
   // Token management
   getToken,
   getIdToken,
   setToken,
   clearToken,
-  
+
   // User management
   getStoredUser,
   setStoredUser,
   clearStoredUser,
-  
+
   // Health & Connection
   healthCheck,
   testBackendConnection,
   testAuthFlow,
-  
+
   // Auth endpoints
   loginUser,
   registerUser,
@@ -2356,7 +2347,7 @@ const api = {
   verifyEmail,
   forgotPassword,
   resetPassword,
-  
+
   // Public endpoints
   getAdvertisedTickets,
   getAllTickets,
@@ -2365,7 +2356,7 @@ const api = {
   searchTickets,
   getPopularDestinations,
   getTestimonials,
-  
+
   // User endpoints
   getUserProfile,
   updateUserProfile,
@@ -2391,7 +2382,7 @@ const api = {
   processPayment,
   downloadTicket,
   requestRefund,
-  
+
   // Vendor endpoints
   submitVendorApplication,
   getMyVendorApplication,
@@ -2425,7 +2416,7 @@ const api = {
   getVendorPerformance,
   getVendorReviews,
   respondToReview,
-  
+
   // Admin endpoints
   getAdminDashboard,
   getAdminTickets,
@@ -2448,17 +2439,17 @@ const api = {
   updateAdminSettings,
   getSystemStats,
   getRevenueStats,
-  
+
   // Payment endpoints
   createPayment,
   verifyPayment,
   getPaymentMethods,
   getPaymentStatus,
   getPaymentHistory,
-  
+
   // File upload
   uploadFile,
-  
+
   // Debug endpoints
   checkAuthStatus,
   testToken,
@@ -2471,7 +2462,7 @@ const api = {
   forceSyncUser,
   clearAllData,
   seedDatabase,
-  
+
   // Mock data
   getMockBookings,
   getMockBookingById,
@@ -2481,7 +2472,7 @@ const api = {
   getMockVendorCards,
   getMockVendorBookings,
   getMockVendorRevenue,
-  
+
   // Smart functions
   smartGetUserProfile,
   smartUpdateUserProfile,
@@ -2495,7 +2486,7 @@ const api = {
   smartUpdateVendorProfile,
   smartCreateVendorCard,
   smartUpdateBookingStatus,
-  
+
   // Utility functions
   forceAdminMode,
   debugUserInfo,
